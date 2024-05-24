@@ -162,3 +162,7 @@ cython_debug/
 
 # Generated app CSS
 static/css/styles.css
+
+# Test recordings & videos
+recordings/videos/*
+recordings/traces/*

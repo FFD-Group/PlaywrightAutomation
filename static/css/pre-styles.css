@@ -13,7 +13,7 @@ body {
         @apply w-full;
 
         fieldset {
-            @apply p-4 w-full flex flex-col justify-between border-slate-200 border-b;
+            @apply p-4 flex flex-col justify-between border-slate-200 border-b;
 
             label {
                 @apply font-bold mx-2 mt-2 gap-4 flex justify-between align-middle items-center;
@@ -28,7 +28,7 @@ body {
             }
 
             button {
-                @apply bg-lime-600 rounded text-white p-4 font-bold text-xl;
+                @apply bg-lime-600 w-full rounded text-white p-4 font-bold text-xl m-2;
             }
         }
     }
