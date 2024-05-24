@@ -6,7 +6,7 @@ def download_file():
     with sync_playwright() as pw:
         chromium = pw.chromium
         browser = chromium.launch(headless=False)
-        context = browser.new_context(record_video_dir="recordings/videos/")
+        context = browser.new_context(record_video_dir="static/recordings/videos/")
         context.tracing.start(screenshots=True, snapshots=True, sources=True)
         page = context.new_page()
         time.sleep(0.5)
@@ -29,7 +29,7 @@ def download_file():
         
         print(page.video.path)
         time.sleep(2)
-        context.tracing.stop(path="recordings/traces/trace.zip")
+        context.tracing.stop(path="static/recordings/traces/trace.zip")
         context.close()
         browser.close()
 

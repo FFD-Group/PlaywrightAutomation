@@ -164,5 +164,5 @@ cython_debug/
 static/css/styles.css
 
 # Test recordings & videos
-recordings/videos/*
-recordings/traces/*
+static/recordings/videos/*
+static/recordings/traces/*
