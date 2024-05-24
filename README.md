@@ -11,3 +11,18 @@ pip install pytest-playwright # require playwright
 playwright install # let playwright install its dependencies
 pytest # run pytest which will run test_* files to make sure all works
 ```
+
+## tailwind build
+
+```cli
+npx tailwindcss -i ./css/pre-styles.css -o ./css/styles.css --watch
+```
+
+## run server
+Start the flask server at http://127.0.0.1:5000 with:
+
+```cli
+flask run
+```
+
+Make accessible on the LAN with `--host=0.0.0.0`.

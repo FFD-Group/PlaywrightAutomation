@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    @apply mx-auto w-full;
+
+    h1 {
+        @apply text-2xl;
+    }
+
+    form {
+        @apply w-fit;
+
+        fieldset {
+            @apply p-4 w-full flex flex-col justify-between;
+
+            label {
+                @apply font-bold mx-2 mt-2 gap-4 flex justify-between;
+
+                input, select {
+                    @apply font-normal;
+                }
+
+                input, select {
+                    @apply border-slate-400 border rounded;
+                }
+            }
+
+            comment {
+                @apply text-xs mx-2 mt-0 p-0 ;
+            }
+        }
+    }
+}
