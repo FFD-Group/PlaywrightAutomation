@@ -3,32 +3,32 @@
 @tailwind utilities;
 
 body {
-    @apply mx-auto w-full;
+    @apply mx-auto w-fit min-w-96 text-slate-500;
 
     h1 {
-        @apply text-2xl;
+        @apply text-2xl text-center font-bold;
     }
 
     form {
-        @apply w-fit;
+        @apply w-full;
 
         fieldset {
-            @apply p-4 w-full flex flex-col justify-between;
+            @apply p-4 w-full flex flex-col justify-between border-slate-200 border-b;
 
             label {
-                @apply font-bold mx-2 mt-2 gap-4 flex justify-between;
+                @apply font-bold mx-2 mt-2 gap-4 flex justify-between align-middle items-center;
 
                 input, select {
-                    @apply font-normal;
-                }
-
-                input, select {
-                    @apply border-slate-400 border rounded;
+                    @apply font-normal border-slate-400 border rounded p-2;
                 }
             }
 
             comment {
                 @apply text-xs mx-2 mt-0 p-0 ;
+            }
+
+            button {
+                @apply bg-lime-600 rounded text-white p-4 font-bold text-xl;
             }
         }
     }

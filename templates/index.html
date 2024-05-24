@@ -12,7 +12,7 @@
         <fieldset>
             <label for="supplier">Supplier
                 <select name="supplier">
-                    <option selected="true">Select a supplier</option>
+                    <option selected="true" disabled>Select a supplier</option>
                     <option value="Lincat">Lincat</option>
                     <option value="Pentland">Pentland</option>
                 </select>
@@ -21,7 +21,7 @@
         <fieldset>
             <label for="download_type">Download type
                 <select name="download_type">
-                    <option selected="true">Select a fetch type</option>
+                    <option selected="true" disabled>Select a fetch type</option>
                     <option value="download">download</option>
                     <option value="automation">automation</option>
                 </select>
@@ -33,7 +33,7 @@
         <fieldset>
             <label for="file_type">File type
                 <select name="file_type">
-                    <option selected="true">Select a file type</option>
+                    <option selected="true" disabled>Select a file type</option>
                     <option value="CSV">CSV</option>
                     <option value="XML">XML</option>
                     <option value="XLSX">XLSX</option>
@@ -43,6 +43,9 @@
                 <input type="input" name="download_path" placeholder="Enter the file save path" />
             </label>
             <comment>Filepath relative to X</comment>
+        </fieldset>
+        <fieldset>
+            <button>Save</button>
         </fieldset>
     </form>
 </body>

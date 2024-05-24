@@ -24,5 +24,5 @@ Start the flask server at http://127.0.0.1:5000 with:
 ```cli
 flask run
 ```
-
+Run in debug with `--debug` - has file watching
 Make accessible on the LAN with `--host=0.0.0.0`.
