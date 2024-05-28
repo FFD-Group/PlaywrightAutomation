@@ -15,7 +15,7 @@ pytest # run pytest which will run test_* files to make sure all works
 ## tailwind build
 
 ```cli
-npx tailwindcss -i ./css/pre-styles.css -o ./css/styles.css --watch
+npx tailwindcss -i ./static/css/pre-styles.css -o ./static/css/styles.css --watch
 ```
 
 ## run server
