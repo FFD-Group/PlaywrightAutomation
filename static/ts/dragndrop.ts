@@ -82,12 +82,8 @@ class Automation {
 }
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('actionlist', () => (
-        new ActionList()
-    ));
-    Alpine.data('automation', () => (
-        new Automation()
-    ))
+    Alpine.data('actionlist', () => {return new ActionList()});
+    Alpine.data('automation', () => {return new Automation()});
 });
 
 Alpine.start()

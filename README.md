@@ -37,3 +37,7 @@ Make accessible on the LAN with `--host=0.0.0.0`.
 npm run dev
 ```
 Runs the vite development server with compiles TypeScript into `assets_compiled/bundled`.
+
+## Resources
+
+Vite & Flask integration: https://dev.to/wtho/get-started-with-alpinejs-and-typescript-4dgf

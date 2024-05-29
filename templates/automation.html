@@ -4,10 +4,10 @@
     {%- if not is_production %}
     <script type="module" src="{{ asset('@vite/client') }}"></script>
     {%- endif %}
+    <script type="module" defer src="{{ asset('static/ts/dragndrop.ts') }}"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Automation Builder</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="/static/css/styles.css" rel="stylesheet">
 </head>
 <body>
@@ -51,6 +51,5 @@
             <button>Save & Test</button>
         </fieldset>
     </form>
-    <script type="module" src="{{ asset('static/ts/dragndrop.ts') }}"></script>
 </body>
 </html>
