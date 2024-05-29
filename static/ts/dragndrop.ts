@@ -32,13 +32,38 @@ class ValidationResult {
 }
 
 class Action {
-    id: number = 0;
+    id: String = "0";
     form_els: Array<FormElement> = [];
 
-    public validate(): ValidationResult  {
+    constructor(htmlAction?: HTMLDivElement) {
+        if (htmlAction) {
+            let el = document.getElementById(htmlAction.id);
+            if (el) {
+                this.id = el.id;
+                let form = el.querySelector("form");
+                // get each form element and add to form_els as a FormElement.
+            }
+        }
+    }
+
+    validate(): ValidationResult  {
         let result = new ValidationResult(true);
 
         return result;
+    }
+
+    dragStartHandler(ev: DragEvent) {
+        if (ev.target instanceof Element && ev.target.classList.contains("action")) {
+            ev.target.classList.add("dragging");
+            Alpine.store("dragged", ev.target);
+        }
+    }
+
+    dragEndHandler(ev: DragEvent) {
+        if (ev.target instanceof Element && ev.target.classList.contains("action")) {
+            ev.target.classList.remove("dragging");
+            Alpine.store("dragged", undefined);
+        }
     }
 }
 
@@ -53,15 +78,13 @@ class ActionList {
         let index = this.actions.indexOf(action);
         if (index > -1) this.actions.splice(index, 1);
     }
-
-    clearActions(): undefined {
-        this.actions = [];
-    }
 }
 
 class Automation {
+    action_list: ActionList;
 
     constructor() {
+        this.action_list = new ActionList();
         console.log("Automation created!");
     }
     
@@ -74,16 +97,23 @@ class Automation {
     
     dropHandler(ev: DragEvent) {
         ev.preventDefault();
-        if (ev.dataTransfer && ev.target) {
-            const data = ev.dataTransfer.getData("text/html");
-            (ev.target as HTMLElement).appendChild(document.getElementById(data)!);
-        }
+        let newAction = (Alpine.store("dragged") as Node).cloneNode(true);
+        (newAction as Element).classList.remove("dragging");
+        document.getElementById("target")!.appendChild(newAction);
+        //this.action_list.addAction(newAction.$data)
+        console.log("Dropped into the automation!");
+    }
+
+    clearList() {
+
     }
 }
 
 document.addEventListener('alpine:init', () => {
     Alpine.data('actionlist', () => {return new ActionList()});
     Alpine.data('automation', () => {return new Automation()});
+    Alpine.data('action', () => {return new Action()});
+    Alpine.store('dragged', undefined);
 });
 
 Alpine.start()

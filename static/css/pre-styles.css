@@ -43,6 +43,16 @@ body {
             @apply border border-slate-300 rounded m-1 p-1 flex flex-col gap-1 relative text-sm;
             cursor: grab;
         }
+
+        .action.dragging {
+            @apply opacity-50 border-sky-700;
+        }
+
+        #target {
+            .action {
+                @apply flex-row;
+            }
+        }
     }
 
     input, select {
