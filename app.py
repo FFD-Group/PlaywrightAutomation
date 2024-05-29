@@ -1,8 +1,12 @@
 from flask import Flask, render_template
 
+from assets_blueprint import assets_blueprint
+
 from download_lincat_file import *
 
 app = Flask(__name__, static_folder="static/")
+
+app.register_blueprint(assets_blueprint)
 
 @app.route("/")
 def index():

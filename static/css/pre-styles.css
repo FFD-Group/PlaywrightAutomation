@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    @apply mx-auto w-fit min-w-96 text-slate-500;
+    @apply mx-auto min-w-fit max-w-screen-lg text-slate-500;
 
     h1 {
         @apply text-2xl text-center font-bold;
@@ -15,21 +15,37 @@ body {
         fieldset {
             @apply p-4 flex flex-col justify-between border-slate-200 border-b;
 
-            label {
-                @apply font-bold mx-2 mt-2 gap-4 flex justify-between align-middle items-center;
-
-                input, select {
-                    @apply font-normal border-slate-400 border rounded p-2;
-                }
-            }
-
-            comment {
-                @apply text-xs mx-2 mt-0 p-0 ;
-            }
-
-            button {
-                @apply bg-lime-600 w-full rounded text-white p-4 font-bold text-xl m-2;
+            input, select {
+                @apply font-normal border-slate-400 border rounded p-2;
             }
         }
+
+        label {
+            @apply font-bold mx-2 mt-2 gap-4 flex justify-between align-middle items-center;
+        }
+
+        comment {
+            @apply text-xs mx-2 mt-0 p-0 ;
+        }
+
+        button {
+            @apply bg-lime-600 w-full rounded text-white p-4 font-bold text-xl m-2;
+        }
+    }
+
+    #automation_builder {
+
+        #actionlist {
+            @apply min-w-64;
+        }
+
+        .action {
+            @apply border border-slate-300 rounded m-1 p-1 flex flex-col gap-1 relative text-sm;
+            cursor: grab;
+        }
+    }
+
+    input, select {
+        @apply font-normal border-slate-400 border rounded p-0.5    ;
     }
 }
