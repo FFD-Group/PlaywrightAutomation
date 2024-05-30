@@ -50,7 +50,7 @@ body {
 
         #target {
             .action {
-                @apply flex-row;
+                @apply flex-row cursor-default;
             }
         }
     }
