@@ -29,9 +29,9 @@ document.addEventListener('alpine:init', () => {
     }));
 
     Alpine.data('action', () => ({
-        form_els,
-        pw_method,
-        pw_method_arg,
+        form_els: [],
+        pw_method: '',
+        pw_method_arg: '',
 
         constructor(htmlAction) {
             if (htmlAction) {
@@ -87,7 +87,7 @@ document.addEventListener('alpine:init', () => {
     }));
 
     Alpine.data('automation', () => ({
-        action_list,
+        action_list: [],
 
         constructor() {
             this.action_list = new ActionList();
@@ -105,11 +105,12 @@ document.addEventListener('alpine:init', () => {
             ev.preventDefault();
             let dropTarget = document.getElementById("target");
             let newAction = (Alpine.store("dragged")).cloneNode(true);
-            (newAction).classList.remove("dragging");
+            newAction.classList.remove("dragging");
             dropTarget.appendChild(newAction);
-            this.action_list.addAction(new Action(newAction));
-            let grabhandle = (newAction).querySelector(".grabhandle");
+            this.action_list.push(newAction);
+            let grabhandle = newAction.querySelector(".grabhandle");
             newAction.removeChild(grabhandle);
+            newAction.removeAttribute("draggable");
         },
 
         clearList() {
