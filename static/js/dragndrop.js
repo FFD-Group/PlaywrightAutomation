@@ -6,7 +6,7 @@ document.addEventListener('alpine:init', () => {
         value: "",
         validation: "",
 
-        constructor(r, t, v, validation) {
+        create(r, t, v, validation) {
             this.required = r;
             this.type = t;
             this.value = v;
@@ -88,11 +88,6 @@ document.addEventListener('alpine:init', () => {
 
     Alpine.data('automation', () => ({
         action_list: [],
-
-        constructor() {
-            this.action_list = new ActionList();
-            console.log("Automation created!");
-        },
         
         dragOverHandler(ev) {
             ev.preventDefault();
