@@ -1,32 +1,4 @@
 document.addEventListener('alpine:init', () => {
-    
-    Alpine.data('formelement', () => ({
-        required: false,
-        type: "",
-        value: "",
-        validation: "",
-
-        create(r, t, v, validation) {
-            this.required = r;
-            this.type = t;
-            this.value = v;
-            this.validation = validation;
-        }
-    }));
-
-    Alpine.data('validationresult', () => ({
-        passed,
-        form_els,
-
-        create(p, els) {
-            this.passed = p;
-            if (els !== undefined && Array.isArray(els)) {
-                this.form_els = els;
-            } else if (els !== undefined) {
-                this.form_els.push(els);
-            }
-        }
-    }));
 
     Alpine.data('action', () => ({
         form_els: [],
@@ -99,7 +71,7 @@ document.addEventListener('alpine:init', () => {
         dropHandler(ev) {
             ev.preventDefault();
             let dropTarget = document.getElementById("target");
-            let newAction = (Alpine.store("dragged")).cloneNode(true);
+            let newAction = Alpine.store("dragged").cloneNode(true);
             newAction.classList.remove("dragging");
             dropTarget.appendChild(newAction);
             this.action_list.push(newAction);
@@ -109,7 +81,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         clearList() {
-
+            this.action_list = [];
+            let targetHtml = document.getElementById("target");
+            targetHtml.querySelectorAll("div.action").forEach((div) => {
+                targetHtml.removeChild(div);
+            });
         }
     }));
 });
