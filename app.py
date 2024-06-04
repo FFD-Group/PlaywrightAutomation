@@ -1,11 +1,8 @@
 from flask import Flask, g, render_template, request, redirect, url_for
-from assets_blueprint import assets_blueprint
 from download_lincat_file import *
 from database import get_db, query_db
 
 app = Flask(__name__, static_folder="static/")
-
-app.register_blueprint(assets_blueprint)
 
 @app.route("/")
 def index():
