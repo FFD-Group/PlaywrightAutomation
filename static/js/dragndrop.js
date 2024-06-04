@@ -2,8 +2,9 @@ document.addEventListener('alpine:init', () => {
 
     Alpine.data('action', () => ({
         form_els: [],
-        pw_method: '',
+        pw_method: 'text',
         pw_method_arg: '',
+        pw_method_arg_2: '',
 
         constructor(htmlAction) {
             if (htmlAction) {
@@ -23,12 +24,6 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        validate()  {
-            let result = new ValidationResult(true);
-
-            return result;
-        },
-
         dragStartHandler(ev) {
             if (ev.target instanceof Element && ev.target.classList.contains("action")) {
                 ev.target.classList.add("dragging");
@@ -44,22 +39,9 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-
-    Alpine.data('actionlist', () => ({
-        actions,
-
-        addAction(action) {
-            this.actions.push(action);
-        },
-
-        removeAction(action) {
-            let index = this.actions.indexOf(action);
-            if (index > -1) this.actions.splice(index, 1);
-        }
-    }));
-
     Alpine.data('automation', () => ({
         action_list: [],
+        start_url: "",
         
         dragOverHandler(ev) {
             ev.preventDefault();
@@ -76,6 +58,8 @@ document.addEventListener('alpine:init', () => {
             dropTarget.appendChild(newAction);
             this.action_list.push(newAction);
             let grabhandle = newAction.querySelector(".grabhandle");
+            let title = grabhandle.querySelector("h3.title");
+            newAction.insertBefore(title, grabhandle);
             newAction.removeChild(grabhandle);
             newAction.removeAttribute("draggable");
         },
@@ -83,9 +67,63 @@ document.addEventListener('alpine:init', () => {
         clearList() {
             this.action_list = [];
             let targetHtml = document.getElementById("target");
-            targetHtml.querySelectorAll("div.action").forEach((div) => {
+            targetHtml.querySelectorAll("div.action:not(.gotopage-action)").forEach((div) => {
                 targetHtml.removeChild(div);
             });
+        },
+
+        _checkUrlValid(input) {
+            let url;
+            try {
+                url = new URL(input);
+            } catch (_) {
+                return false;
+            }
+            return true;
+        },
+
+        _markActionInvalid(htmlAction) {
+            i
+        },
+
+        _clearValidation() {
+            startAction = document.querySelector("#starting-action input");
+            startAction.classList.remove("invalid-input");
+            startAction.classList.remove("animate-pulse");
+            this.action_list.forEach((htmlAction) => {
+                htmlAction.querySelectorAll("input").forEach((input) => {
+                    input.classList.remove("invalid-input");
+                    input.classList.remove("animate-pulse");
+                })
+            });
+        },
+
+        validate() {
+            this._clearValidation();
+            let valid = true;
+            // check start URL is valid
+            if (!this._checkUrlValid(this.start_url)) {
+                startAction = document.querySelector("#starting-action input");
+                startAction.classList.add("invalid-input");
+                startAction.classList.add("animate-pulse");
+                valid = false;
+            }
+            // check there is at least 1 action
+            if (this.action_list.length <= 0) {
+                valid = false;
+            }
+            // check each action is valid
+            this.action_list.forEach((htmlAction) => {
+                htmlAction.querySelectorAll("input").forEach((input) => {
+                    if (input.value.trim() === "") {
+                        valid = false;
+                        input.classList.add("invalid-input");
+                        input.classList.add("animate-pulse");
+                    }
+                })
+            });
+            console.log("Validate returning: ", valid);
+            return valid;
         }
     }));
 });

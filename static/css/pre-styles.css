@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-    @apply mx-auto min-w-fit max-w-screen-lg text-slate-500;
+    @apply mx-auto min-w-fit text-slate-500;
 
     h1 {
         @apply text-2xl text-center font-bold;
@@ -50,12 +50,21 @@ body {
 
         #target {
             .action {
-                @apply flex-row cursor-default;
+                @apply flex-row cursor-default items-center;
+            }
+
+            label:has(input.invalid-input)::after {
+                content: "\26A0";
+                @apply p-0 m-0;
             }
         }
     }
 
     input, select {
         @apply font-normal border-slate-400 border rounded p-0.5    ;
+    }
+
+    .invalid-input {
+        @apply border border-red-700 bg-red-50 relative;
     }
 }

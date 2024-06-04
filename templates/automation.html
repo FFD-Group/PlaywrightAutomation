@@ -9,22 +9,20 @@
 </head>
 <body>
     <h1>Automation Builder</h1>
-    <div id="automation_builder" class="container flex min-w-96 w-full gap-2">
-        <div id="actionlist" class="border border-slate-200 rounded w-1/4 flex flex-col gap-0.5">
-            <div class="action" x-data="action" x-init="constructor($el)" :id="$id('action')"
+    <div id="automation_builder" class="container flex min-w-96 w-full gap-2 min-h-96">
+        <div id="actionlist" class="border border-slate-200 rounded w-1/3 flex flex-col gap-0.5">
+            <div class="action pwclick" x-data="action" x-init="constructor($el)" :id="$id('action')"
                 @dragstart="dragStartHandler($event)" 
-                @dragend="dragEndHandler($event)" 
-                class="action pwclick" 
+                @dragend="dragEndHandler($event)"
                 draggable="true">
-                <div class="grabhandle flex gap-1 items-center justify-start font-bold">
+                <div class="grabhandle flex gap-1 items-center justify-start">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
                         <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
                     </svg>
-                    <h3>Find an element</h3>
+                    <h3 class="title p-1 font-bold bg-sky-100 rounded border border-slate-300">Click an element</h3>
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
-                        <option disabled selected>Choose one...</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -34,30 +32,170 @@
                     </select>
                 </label>
                 <label>:
-                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" placeholder="" />
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <p>and click on it.</p>
+            </div>
+            <div class="action pwframeclick" x-data="action" x-init="constructor($el)" :id="$id('action')"
+                @dragstart="dragStartHandler($event)" 
+                @dragend="dragEndHandler($event)"
+                draggable="true">
+                <div class="grabhandle flex gap-1 items-center justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="title p-1 font-bold bg-orange-100 rounded border border-slate-300">Click an element within an iframe</h3>
+                </div>
+                <label>Within iframe:
+                    <input type="text" x-model="pw_method_arg_2" pattern="" name="frame_selector" placeholder="iframe selector" />
+                </label>
+                <label>Get Element by
+                    <select name="getby" x-model="pw_method">
+                        <option value="text">text</option>
+                        <option value="label">label</option>
+                        <option value="placeholder">placeholder</option>
+                        <option value="alttext">alt text</option>
+                        <option value="title">title</option>
+                        <option value="attribute">attribute</option>
+                    </select>
+                </label>
+                <label>:
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <p>and click on it.</p>
+            </div>
+            <div class="action pwdownload" x-data="action" x-init="constructor($el)" :id="$id('action')"
+                @dragstart="dragStartHandler($event)" 
+                @dragend="dragEndHandler($event)"
+                draggable="true">
+                <div class="grabhandle flex gap-1 items-center justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="title p-1 font-bold bg-indigo-100 rounded border border-slate-300">Click & wait for download</h3>
+                </div>
+                <label>Get Element by
+                    <select name="getby" x-model="pw_method">
+                        <option value="text">text</option>
+                        <option value="label">label</option>
+                        <option value="placeholder">placeholder</option>
+                        <option value="alttext">alt text</option>
+                        <option value="title">title</option>
+                        <option value="attribute">attribute</option>
+                    </select>
+                </label>
+                <label>:
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <p>click it, and wait for a download.</p>
+            </div>
+            <div class="action pwinput" x-data="action" x-init="constructor($el)" :id="$id('action')"
+                @dragstart="dragStartHandler($event)" 
+                @dragend="dragEndHandler($event)"
+                draggable="true">
+                <div class="grabhandle flex gap-1 items-center justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="title p-1 font-bold bg-red-100 rounded border border-slate-300">Fill an input</h3>
+                </div>
+                <label>Get Element by
+                    <select name="getby" x-model="pw_method">
+                        <option value="text">text</option>
+                        <option value="label">label</option>
+                        <option value="placeholder">placeholder</option>
+                        <option value="alttext">alt text</option>
+                        <option value="title">title</option>
+                        <option value="attribute">attribute</option>
+                    </select>
+                </label>
+                <label>:
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <label>and input text:
+                    <input type="text" x-model="pw_method_arg_2" pattern="" name="selector" placeholder="input text" />
+                </label>
+            </div>
+            <div class="action pwcheck" x-data="action" x-init="constructor($el)" :id="$id('action')"
+                @dragstart="dragStartHandler($event)" 
+                @dragend="dragEndHandler($event)"
+                draggable="true">
+                <div class="grabhandle flex gap-1 items-center justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="title p-1 font-bold bg-pink-100 rounded border border-slate-300">Tick a checkbox</h3>
+                </div>
+                <label>Get Element by
+                    <select name="getby" x-model="pw_method">
+                        <option value="text">text</option>
+                        <option value="label">label</option>
+                        <option value="placeholder">placeholder</option>
+                        <option value="alttext">alt text</option>
+                        <option value="title">title</option>
+                        <option value="attribute">attribute</option>
+                    </select>
+                </label>
+                <label>:
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <p>and check the box.</p>
+            </div>
+            <div class="action pwselect" x-data="action" x-init="constructor($el)" :id="$id('action')"
+                @dragstart="dragStartHandler($event)" 
+                @dragend="dragEndHandler($event)"
+                draggable="true">
+                <div class="grabhandle flex gap-1 items-center justify-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-3">
+                        <path fill-rule="evenodd" d="M3 6a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3v2.25a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3V6ZM3 15.75a3 3 0 0 1 3-3h2.25a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-2.25Zm9.75 0a3 3 0 0 1 3-3H18a3 3 0 0 1 3 3V18a3 3 0 0 1-3 3h-2.25a3 3 0 0 1-3-3v-2.25Z" clip-rule="evenodd" />
+                    </svg>
+                    <h3 class="title p-1 font-bold bg-blue-100 rounded border border-slate-300">Select an option</h3>
+                </div>
+                <label>Get Element by
+                    <select name="getby" x-model="pw_method">
+                        <option value="text">text</option>
+                        <option value="label">label</option>
+                        <option value="placeholder">placeholder</option>
+                        <option value="alttext">alt text</option>
+                        <option value="title">title</option>
+                        <option value="attribute">attribute</option>
+                    </select>
+                </label>
+                <label>:
+                    <input type="text" x-model="pw_method_arg" pattern="" name="selector" :placeholder="pw_method" />
+                </label>
+                <label>and select option:
+                    <input type="text" x-model="pw_method_arg_2" pattern="" name="select label" placeholder="option label" />
                 </label>
             </div>
         </div>
-        <div
-            id="target" x-data="automation"
-            class="min-h-[768px] min-w-96 w-3/4 border border-slate-200 rounded"
-            @drop="dropHandler($event)" @dragover="dragOverHandler($event)"
-        >
-            <div class="flex items-center justify-around p-2 border-b border-slate-300">
-                <p>Drag and drop actions into the list to create an automation.</p>
-                <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
-                    @click="console.log($data.action_list)">Log actions</button>
-                <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
-                    @click="clearList">Clear all</button>
+        <div class="w-full border border-slate-200 rounded" x-data="automation">
+            <div class="min-h-[768px] min-w-96 h-96"
+                id="target"
+                @drop="dropHandler($event)" @dragover="dragOverHandler($event)"
+            >
+                <div class="flex items-center justify-around p-2 border-b border-slate-300">
+                    <p>Drag and drop actions into the list to create an automation.</p>
+                    <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
+                        @click="console.log($data.start_url, $data.action_list)">Log actions</button>
+                    <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
+                        @click="clearList">Clear all</button>
+                </div>
+                <div class="gotopage-action action pwgoto" id="starting-action">
+                    <h3 class="title p-1 font-bold bg-lime-100 border border-slate-300 rounded">Start page</h3>
+                    <label>Go to URL:
+                        <input class="w-[400px]" type="url" x-model="start_url" name="gotopage" placeholder="page URL" />
+                    </label>
+                </div>
             </div>
+            <form action="/test-automation/lincat" class="flex w-full justify-center border-t border-slate-300">
+                <fieldset class="flex-row max-w-screen-sm w-96">
+                    <button class="bg-slate-200 text-slate-500">Cancel</button>
+                    <button @click.prevent="validate()">Save & Test</button>
+                </fieldset>
+            </form>
         </div>
     </div>
-    <form action="/test-automation/lincat" class="flex w-full justify-center">
-        <fieldset class="flex-row max-w-screen-sm w-96">
-            <button class="bg-slate-200 text-slate-500">Cancel</button>
-            <button>Save & Test</button>
-        </fieldset>
-    </form>
     
     <script type="text/javascript" src="../static/js/dragndrop.js"></script>
 </body>
