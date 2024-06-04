@@ -645,6 +645,10 @@ video {
   max-width: 640px;
 }
 
+.max-w-lg {
+  max-width: 32rem;
+}
+
 @keyframes pulse {
   50% {
     opacity: .5;
