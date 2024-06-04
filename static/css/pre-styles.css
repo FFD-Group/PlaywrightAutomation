@@ -67,4 +67,8 @@ body {
     .invalid-input {
         @apply border border-red-700 bg-red-50 relative;
     }
+
+    #invalidDialog::backdrop {
+        @apply bg-slate-700 opacity-75;
+    }
 }

@@ -191,9 +191,21 @@
             <form action="/test-automation/lincat" class="flex w-full justify-center border-t border-slate-300">
                 <fieldset class="flex-row max-w-screen-sm w-96">
                     <button class="bg-slate-200 text-slate-500">Cancel</button>
-                    <button @click.prevent="validate()">Save & Test</button>
+                    <button @click.prevent="saveAutomation()">Save & Test</button>
                 </fieldset>
             </form>
+            <dialog id="invalidDialog" class="p-2 rounded">
+                <div class="flex justify-between">
+                    <p>&#9888;</p>
+                    <button class="w-full text-right font-bold text-xl" autofocus @click.prevent="closeInvalidDialog()">X</button>
+                </div>
+                <p class="mt-2 p-2 text-lg font-bold">Fix the validation errors highlighted.</p>
+                <ul x-show="errors.length > 0" class="list-disc list-inside p-2 m-2">
+                    <template x-for="error in errors">
+                        <li x-text="error"></li>
+                    </template>
+                </ul>
+            </dialog>
         </div>
     </div>
     

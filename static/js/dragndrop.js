@@ -5,6 +5,8 @@ document.addEventListener('alpine:init', () => {
         pw_method: 'text',
         pw_method_arg: '',
         pw_method_arg_2: '',
+        valid: true,
+        errors: [],
 
         constructor(htmlAction) {
             if (htmlAction) {
@@ -87,6 +89,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         _clearValidation() {
+            this.errors = [];
             startAction = document.querySelector("#starting-action input");
             startAction.classList.remove("invalid-input");
             startAction.classList.remove("animate-pulse");
@@ -106,24 +109,47 @@ document.addEventListener('alpine:init', () => {
                 startAction = document.querySelector("#starting-action input");
                 startAction.classList.add("invalid-input");
                 startAction.classList.add("animate-pulse");
+                this.errors.push("Please enter a valid starting page URL.");
                 valid = false;
             }
             // check there is at least 1 action
             if (this.action_list.length <= 0) {
+                this.errors.push("Please add at least one action.");
                 valid = false;
             }
             // check each action is valid
+            let invalidInputs = false;
             this.action_list.forEach((htmlAction) => {
                 htmlAction.querySelectorAll("input").forEach((input) => {
                     if (input.value.trim() === "") {
                         valid = false;
                         input.classList.add("invalid-input");
                         input.classList.add("animate-pulse");
+                        invalidInputs = true;
                     }
-                })
+                });
             });
+            if (invalidInputs) {
+                this.errors.push("Please make sure all actions are complete.");
+            }
             console.log("Validate returning: ", valid);
             return valid;
+        },
+
+        closeInvalidDialog() {
+            document.getElementById("invalidDialog").close();
+        },
+
+        _openInvalidDialog() {
+            document.getElementById("invalidDialog").showModal();
+        },
+
+        saveAutomation() {
+            if (!this.validate()) {
+                this._openInvalidDialog();
+                return;
+            }
+            // save, submit etc...
         }
     }));
 });
