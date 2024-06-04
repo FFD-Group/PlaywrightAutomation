@@ -4,20 +4,6 @@ import sqlite3
 
 DATABASE = "suppliers.sqlite"
 
-def create_database() -> None:
-    conn = sqlite3.connect(DATABASE)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS suppliers (id INTEGER PRIMARY KEY,
-        name VARCHAR,
-        download_type VARCHAR,
-        download_url VARCHAR,
-        file_type VARCHAR,
-        download_path VARCHAR
-        ''')
-    conn.commit()
-    conn.close()
-
 def get_db() -> sqlite3.Connection:
     db = getattr(g, "_database", None)
     if db is None:
