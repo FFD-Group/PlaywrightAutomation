@@ -1,7 +1,7 @@
 # PlaywrightAutomation
 Using Playwright to automate browser tasks.
 
-## Build
+## Setup
 Tailwind is used for CSS and compiles `/static/css/` to `/static/css/styles.css`.
 Flask runs the web server.
 
@@ -20,6 +20,14 @@ pytest # run pytest which will run test_* files to make sure all works
 
 ```cli
 npx tailwindcss -i ./static/css/pre-styles.css -o ./static/css/styles.css --watch
+```
+
+### initial the database
+Running an SQLite3 database which is in `suppliers.sqlite`. The schema for this is `schema.sql` which
+can be run using;
+```python
+from app import init_db
+init_db()
 ```
 
 ### run server
