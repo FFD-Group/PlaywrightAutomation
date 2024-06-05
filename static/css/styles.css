@@ -641,12 +641,12 @@ video {
   min-width: 24rem;
 }
 
-.max-w-screen-sm {
-  max-width: 640px;
-}
-
 .max-w-lg {
   max-width: 32rem;
+}
+
+.max-w-screen-sm {
+  max-width: 640px;
 }
 
 @keyframes pulse {

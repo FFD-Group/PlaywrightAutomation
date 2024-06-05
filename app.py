@@ -1,12 +1,14 @@
 from flask import Flask, g, render_template, request, redirect, url_for
 from download_lincat_file import *
 from database import get_db, query_db
+from suppliers import get_suppliers
 
 app = Flask(__name__, static_folder="static/")
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    suppliers = get_suppliers()
+    return render_template("index.html", suppliers=suppliers)
 
 @app.route("/automation-builder")
 def automation_builder():
