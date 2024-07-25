@@ -187,8 +187,15 @@ document.addEventListener('alpine:init', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalActions)
             })
-            .then(() => {
+            .then((stream) => {
                 console.log("data submitted...");
+                if (stream.ok) {
+                    return stream.json();
+                }
+                throw new error("Response was not OK! Status: " + stream.status) 
+            })
+            .then((json) => {
+                console.log(json);
             })
             .catch((error) => {
                 console.error(error);

@@ -22,8 +22,7 @@ def test_automation(supplier: str):
     builder = AutomationBuilder(supplier, data)
     automation = builder.build_automation()
     test_results = builder.test_automation(automation)
-    print(test_results)
-    return "Tested!"
+    return test_results
 
 @app.teardown_appcontext
 def close_connection(exception) -> None:

@@ -46,6 +46,12 @@ class AutomationBuilder:
         return automation_list
 
     def test_automation(self, automation: list[Any]) -> list[str, str]:
+        report = {
+            "error": None,
+            "video": "",
+            "trace": "",
+            "downloads": []
+        }
         try:
             # run the automation steps and return trace and downloads
             with sync_playwright() as pw:
@@ -58,6 +64,8 @@ class AutomationBuilder:
                 start_url = automation[0]['url']
                 page.goto(start_url)
 
+                downloads = []
+
                 for action in automation[1:]:
                     # call the action => func_name, page => page, **args
                     func = action['action'] # func name
@@ -67,22 +75,23 @@ class AutomationBuilder:
                         "input": action['pw_arg_2']
                     }
                     result = getattr(playwright_automation, func)(page, **args) # run function
-                    if result:
-                        print(result)
+                    if func == "playwright_click_download" and result:
+                        downloads.append(result)
                     time.sleep(0.5)
 
-                print(page.video.path)
                 time.sleep(2)
+                video_path = page.video.path()
                 context.tracing.stop(path="static/recordings/traces/trace.zip")
                 context.close()
                 browser.close()
         except Exception as e:
             print(e)
-            return ["Failure", "error"]
-        return [
-            page.video.path,
-            "static/recordings/traces/trace.zip"
-        ]
+            report["error"] = e.message
+            return report
+        report["video"] = video_path
+        report["trace"] = "static/recordings/traces/trace.zip"
+        report["downloads"] = downloads
+        return report
 
     def _read_start_url(self) -> None:
         self.start_url = self.action_list[0]['pw_url']
