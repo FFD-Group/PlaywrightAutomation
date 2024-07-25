@@ -17,4 +17,6 @@ def get_suppliers() -> list:
     r = requests.get(SUPPLIERS_API, headers=API_HEADERS)
     if (r.status_code == 200):
         return r.json()
+    else:
+        pass
     return []

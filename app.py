@@ -1,5 +1,5 @@
 from flask import Flask, g, render_template, request, redirect, url_for
-from download_lincat_file import *
+from automation_builder import AutomationBuilder
 from database import get_db, query_db
 from suppliers import get_suppliers
 
@@ -10,14 +10,18 @@ def index():
     suppliers = get_suppliers()
     return render_template("index.html", suppliers=suppliers)
 
-@app.route("/automation-builder")
-def automation_builder():
-    return render_template("automation.html")
+@app.route("/automation-builder/<string:supplier>")
+def automation_builder(supplier: str):
+    return render_template("automation.html", supplier=supplier)
 
-@app.route("/test-automation/<string:supplier>")
+@app.route("/test-automation/<string:supplier>", methods=['POST'])
 def test_automation(supplier: str):
-    ## test the automation for the supplier passed
-    download_file()
+    data = request.get_json()
+    print("Data received from POST!")
+    print(data)
+    builder = AutomationBuilder(supplier, data)
+    print(builder.test_automation())
+
     return "Tested!"
 
 @app.teardown_appcontext

@@ -2,6 +2,7 @@ document.addEventListener('alpine:init', () => {
 
     Alpine.data('action', () => ({
         form_els: [],
+        action: '',
         pw_method: 'text',
         pw_method_arg: '',
         pw_method_arg_2: '',
@@ -12,6 +13,11 @@ document.addEventListener('alpine:init', () => {
             if (htmlAction) {
                 this.populateFormElements(htmlAction);
                 htmlAction.removeAttribute("draggable");
+                classes = htmlAction.classList;
+                console.log(classes);
+                classes.remove("action");
+                this.action = classes[0];
+                console.log(this.action);
             }
         },
 
@@ -44,6 +50,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('automation', () => ({
         action_list: [],
         start_url: "",
+        errors: [],
         
         dragOverHandler(ev) {
             ev.preventDefault();
@@ -144,13 +151,48 @@ document.addEventListener('alpine:init', () => {
             document.getElementById("invalidDialog").showModal();
         },
 
+        _buildFinalActionList() {
+            finalActionList = [];
+            let action = {
+                pw_action: "start",
+                pw_url: this.start_url
+            };
+            finalActionList.push(action);
+            this.action_list.forEach((htmlAction) => {
+                let action = {};
+                let pw_action = htmlAction._x_dataStack[0];
+                let action_class = htmlAction.cloneNode(true).classList;
+                action_class.remove("action");
+                action.pw_action = action_class[0];
+                action.pw_method = pw_action.pw_method;
+                action.pw_method_arg = pw_action.pw_method_arg;
+                action.pw_method_arg_2 = pw_action.pw_method_arg_2;
+                finalActionList.push(action);
+            });
+            return finalActionList;
+        },
+
         saveAutomation() {
             if (!this.validate()) {
                 this._openInvalidDialog();
                 return;
             }
+            finalActions = this._buildFinalActionList();
+            console.log(finalActions);
             // save, submit etc...
-            
+            // get form action for url, post finalActions as data to url...
+            form_action = document.getElementById("submit_form").action;
+            fetch(form_action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalActions)
+            })
+            .then(() => {
+                console.log("data submitted...");
+            })
+            .catch((error) => {
+                console.error(error);
+            });
         }
     }));
 });

@@ -177,8 +177,6 @@
                 <div class="flex items-center justify-around p-2 border-b border-slate-300">
                     <p>Drag and drop actions into the list to create an automation.</p>
                     <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
-                        @click="console.log($data.start_url, $data.action_list)">Log actions</button>
-                    <button class="clear border border-slate-400 bg-slate-50 rounded p-1"
                         @click="clearList">Clear all</button>
                 </div>
                 <div class="gotopage-action action pwgoto" id="starting-action">
@@ -188,7 +186,7 @@
                     </label>
                 </div>
             </div>
-            <form action="/test-automation/lincat" class="flex w-full justify-center border-t border-slate-300">
+            <form action="/test-automation/{{ supplier }}" id="submit_form" method="POST" class="flex w-full justify-center border-t border-slate-300">
                 <fieldset class="flex-row max-w-screen-sm w-96">
                     <button class="bg-slate-200 text-slate-500">Cancel</button>
                     <button @click.prevent="saveAutomation()">Save & Test</button>
@@ -200,7 +198,7 @@
                     <button class="w-full text-right font-bold text-xl" autofocus @click.prevent="closeInvalidDialog()">X</button>
                 </div>
                 <p class="mt-2 p-2 text-lg font-bold">Fix the validation errors highlighted.</p>
-                <ul x-show="errors.length > 0" class="list-disc list-inside p-2 m-2">
+                <ul class="list-disc list-inside p-2 m-2">
                     <template x-for="error in errors">
                         <li x-text="error"></li>
                     </template>
