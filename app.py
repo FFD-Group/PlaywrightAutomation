@@ -20,8 +20,9 @@ def test_automation(supplier: str):
     print("Data received from POST!")
     print(data)
     builder = AutomationBuilder(supplier, data)
-    print(builder.test_automation())
-
+    automation = builder.build_automation()
+    test_results = builder.test_automation(automation)
+    print(test_results)
     return "Tested!"
 
 @app.teardown_appcontext
