@@ -205,6 +205,50 @@
                 </ul>
             </dialog>
         </div>
+        <div id="report_container"
+            x-data="report"
+            x-show="show_report"
+            @displayreport.window="displayReport($event)"
+            class="w-full absolute top-0 left-0">
+            <div id="report_bg" class="w-full h-screen bg-slate-700 opacity-50">
+            </div>
+            <div id="report" class="bg-white mx-auto opacity-100 z-10 absolute top-10 left-10 right-10 bottom-10 p-2 rounded">
+                <div class="flex justify-between">
+                    <h1>Report</h1>
+                    <div class="font-bold text-xl cursor-pointer" @click.prevent="show_report = false;">&cross;</div>
+                </div>
+                <section x-show="data.error">
+                    <p x-text="data.error" class="bg-red-800 font-bold"></p>
+                </section>
+                <section x-show="!data.error">
+                    <p class="bg-green-800 text-white font-bold p-2">Successfully run automation for {{ supplier }}.</p>
+                </section>
+                <div x-show="!data.error">
+                    <div class="flex">
+                        <section id="report_video">
+                            <h2 class="text-center font-bold">Video</h2>
+                            <video id="video_element" width="100%" controls>
+                                <source :src="data.video" type="video/webm">
+                                Please use a more up-to-date browser that supports HTML videos.
+                            </video>
+                        </section>
+                        <section id="report_trace" class="p-4">
+                            <h2 class="font-bold">Trace</h2>
+                            <div class="rounded-xl bg-sky-900 text-white text-center px-4 py-2">
+                                <a :href="data.trace" target="_blank">Download trace</a>
+                            </div>
+                            <p>Download the trace, go to <a href="https://trace.playwright.dev/">trace.playwright.dev</a> and upload the trace file to see steps taken and useful debug information.</p>
+                        </section>
+                    </div>
+                    <section id="report_downloads">
+                        <h2 class="font-bold">Downloads</h2>
+                        <template x-for="download in data.downloads">
+                            <a :href="download" class="border-b border-slate-300" target="_blank" x-text="`Download ` + download"></a>
+                        </template>
+                    </section>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script type="text/javascript" src="../static/js/automation-builder.js"></script>

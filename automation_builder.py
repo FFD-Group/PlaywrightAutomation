@@ -1,6 +1,7 @@
 from typing import Any
 from playwright.sync_api import sync_playwright
 import playwright_automation
+from pathlib import Path
 
 import time
 ## Receives a supplier ID and a list of actions from the HTML UI
@@ -76,20 +77,20 @@ class AutomationBuilder:
                     }
                     result = getattr(playwright_automation, func)(page, **args) # run function
                     if func == "playwright_click_download" and result:
-                        downloads.append(result)
+                        downloads.append(f"/{result}")
                     time.sleep(0.5)
 
                 time.sleep(2)
-                video_path = page.video.path()
+                video_path = "/static/recordings/videos/" + Path(page.video.path()).name
                 context.tracing.stop(path="static/recordings/traces/trace.zip")
                 context.close()
                 browser.close()
         except Exception as e:
             print(e)
-            report["error"] = e.message
+            report["error"] = str(e)
             return report
         report["video"] = video_path
-        report["trace"] = "static/recordings/traces/trace.zip"
+        report["trace"] = "/static/recordings/traces/trace.zip"
         report["downloads"] = downloads
         return report
 

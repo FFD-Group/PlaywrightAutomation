@@ -196,10 +196,22 @@ document.addEventListener('alpine:init', () => {
             })
             .then((json) => {
                 console.log(json);
+                window.dispatchEvent(new CustomEvent("displayreport", {detail: json}));
             })
             .catch((error) => {
                 console.error(error);
             });
+        }
+    }));
+
+    Alpine.data('report', () => ({
+        data: false,
+        show_report: false,
+
+        displayReport(event) {
+            this.data = event.detail;
+            this.show_report = true;
+            document.getElementById("video_element").load();
         }
     }));
 });
