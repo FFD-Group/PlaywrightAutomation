@@ -23,6 +23,7 @@
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -51,6 +52,7 @@
                 </label>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -76,6 +78,7 @@
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -101,6 +104,7 @@
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -128,6 +132,7 @@
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -153,6 +158,7 @@
                 </div>
                 <label>Get Element by
                     <select name="getby" x-model="pw_method">
+                        <option value="">CSS selector</option>
                         <option value="text">text</option>
                         <option value="label">label</option>
                         <option value="placeholder">placeholder</option>
@@ -218,7 +224,7 @@
                     <div class="font-bold text-xl cursor-pointer" @click.prevent="show_report = false;">&cross;</div>
                 </div>
                 <section x-show="data.error">
-                    <p x-text="data.error" class="bg-red-800 font-bold"></p>
+                    <p x-text="data.error" class="bg-red-800 text-white font-bold p-2"></p>
                 </section>
                 <section x-show="!data.error">
                     <p class="bg-green-800 text-white font-bold p-2">Successfully run automation for {{ supplier }}.</p>
@@ -243,7 +249,9 @@
                     <section id="report_downloads">
                         <h2 class="font-bold">Downloads</h2>
                         <template x-for="download in data.downloads">
-                            <a :href="download" class="border-b border-slate-300" target="_blank" x-text="`Download ` + download"></a>
+                            <div>
+                                <a :href="download" class="border-b border-slate-300" target="_blank" x-text="`Download ` + download"></a>
+                            </div>
                         </template>
                     </section>
                 </div>

@@ -3,7 +3,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('action', () => ({
         form_els: [],
         action: '',
-        pw_method: 'text',
+        pw_method: '',
         pw_method_arg: '',
         pw_method_arg_2: '',
         valid: true,

@@ -44,13 +44,28 @@ def playwright_click_download(page: Page, type: str, text: str, input: str) -> s
     return f"downloads/{download.suggested_filename}"
 
 def playwright_fill_input(page: Page, type: str, text: str, input: str) -> None:
-    pass
+    if type:
+        locator_type = _get_locator_type(type)
+        element = getattr(page, locator_type)(text)
+    else:
+        element = page.locator(text)
+    element.fill(input)
 
 def playwright_tick_checkbox(page: Page, type: str, text: str, input: str) -> None:
-    pass
+    if type:
+        locator_type = _get_locator_type(type)
+        element = getattr(page, locator_type)(text)
+    else:
+        element = page.locator(text)
+    element.check()
 
 def playwright_select_dropdown(page: Page, type: str, text: str, input: str) -> None:
-    pass
+    if type:
+        locator_type = _get_locator_type(type)
+        element = getattr(page, locator_type)(text)
+    else:
+        element = page.locator(text)
+    element.select_option(input)
 
 def _get_locator_type(type) -> str:
     return CONSTANT_LOCATOR_TYPES[type]
