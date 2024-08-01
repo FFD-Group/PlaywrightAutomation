@@ -10,6 +10,22 @@ def index():
     suppliers = get_suppliers()
     return render_template("index.html", suppliers=suppliers)
 
+@app.route("/automations/download/save", methods=['POST'])
+def save_download():
+    data = request.get_json()
+    print(data)
+    try:
+        ## INSERT SUPPLIER ROW
+        inserted = query_db(
+            "INSERT INTO automations (type, url, location, name, supplier_id) VALUES (?,?,?,?,?)",
+            (1, data["download_url"], data["save_location"], data["automation_name"], data["supplier_id"])
+        )
+        result = [dict(row) for row in inserted]
+        print(result)
+    except Exception as e:
+        print(e)
+    return result
+
 @app.route("/automation-builder/<int:supplier_id>/new")
 def automation_builder(supplier_id: int):
     return render_template("automation.html", supplier_id=supplier_id)
@@ -28,10 +44,6 @@ def get_automations(supplier_id: int):
     result = [dict(row) for row in existing_automations]
     print(result)
     return result
-
-@app.route("/automation/<int:supplier_id>/<int:automation_id>/edit")
-def edit_automation(supplier_id: int, automation_id: int):
-    return f"Edit {supplier_id} automation with ID: {automation_id}."
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
 def delete_automation(supplier_id: int, automation_id: int):

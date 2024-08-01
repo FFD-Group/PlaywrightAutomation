@@ -12,7 +12,7 @@
         <h1>Supplier Gathering</h1>
         <fieldset class="flex justify-center align-middle gap-2 m-4 p-2 border border-slate-200 rounded">
             <label for="supplier">Supplier
-                <select name="supplier" x-model="selection" @change="load_disabled = !selection;">
+                <select name="supplier" id="supplierselect" x-model="selection" @change="load_disabled = !selection;">
                     <option value="" selected>Select a supplier</option>
                     {% for supplier in suppliers %}
                         {% if supplier.value %}
@@ -29,41 +29,37 @@
         </fieldset>
     </div>
     <div class="flex">
-        <form class="border border-slate-200 rounded m-2 p-2"> <!-- New Automation -->
+        <form class="border border-slate-200 rounded m-2 p-2" x-data="newAutomation"> <!-- New Automation -->
             <h2 class="text-center font-bold text-lg">New Automation</h2>
             <fieldset>
-                <label for="download_type">Download type
-                    <select name="download_type">
-                        <option selected="true" disabled>Select a fetch type</option>
-                        <option value="download">download</option>
-                        <option value="automation">automation</option>
+                <label for="name">Name
+                    <input type="text" x-model="name" name="name" placeholder="Enter a name" required />
+                </label>
+                <label for="download_type">Type
+                    <select name="download_type" x-model="type" required>
+                        <option selected="true">Select a fetch type</option>
+                        <option value="1">Download</option>
+                        <option value="0">Automation</option>
                     </select>
                 </label>
-                <label for="download_url">Download URL
-                    <input type="url" name="download_url" placeholder="Enter the download URL" />
+                <label for="download_url" x-show="type == 1">Download URL
+                    <input type="url" x-model="url" name="download_url" placeholder="Enter the download URL" :required="type == 1" />
+                </label>
+                <label for="location">Save location
+                    <select name="location" x-model="location" required>
+                        <option selected="true">Select where to save the file(s)</option>
+                        <option value="83475173jwegbfby228ur8">Root WorkDrive Folder</option>
+                        <option value="iuhs87sb6sd7b9db797b98">WorkDrive Folder 2</option>
+                    </select>
                 </label>
             </fieldset>
             <fieldset>
-                <label for="file_type">File type
-                    <select name="file_type">
-                        <option selected="true" disabled>Select a file type</option>
-                        <option value="CSV">CSV</option>
-                        <option value="XML">XML</option>
-                        <option value="XLSX">XLSX</option>
-                    </select>
-                </label>
-                <label for="download_path">Download path
-                    <input type="input" name="download_path" placeholder="Enter the file save path" />
-                </label>
-                <comment>Filepath relative to X</comment>
-            </fieldset>
-            <fieldset>
-                <button>Save</button>
+                <button type="submit" @click.prevent="save()" x-text="(type == null || type == 1) ? 'Save' : 'Build & Test'"></button>
             </fieldset>
         </form>
         <form x-data="currentSupplier" class="border border-slate-200 rounded m-2 p-2"
             @supplierloaded.window="displaySupplierData($event)"> <!-- Existing Automation -->
-            <h2 class="text-center font-bold text-lg">Existing Automations</h2>
+            <h2 class="text-center font-bold text-lg" x-text="Alpine.store('selectedSupplierLabel') ? Alpine.store('selectedSupplierLabel') + ' Automations' : 'Existing Automations'"></h2>
             <fieldset>
                 <template x-for="automation in automations">
                     <div class="border-b border-slate-200 m-1 p-1">
@@ -80,10 +76,12 @@
                         </div>
                     </div>
                 </template>
+                <template x-if="automations.length < 1">
+                    <p class="italic text-center text-xs">No automations yet.</p>
+                </template>
             </fieldset>
             <fieldset>
-                <button @click.prevent="editSelectedAutomation()" type="button">Edit</button>
-                <button class="bg-red-600" @click.prevent="deleteSelectedAutomation()" type="button">Delete</button>
+                <button class="bg-red-500 text-white py-0" @click.prevent="deleteSelectedAutomation()" type="button">Delete</button>
             </fieldset>
         </form>
     </div>
