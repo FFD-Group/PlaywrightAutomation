@@ -5,49 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supplier Gather</title>
     <link href="/static/css/styles.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="max-w-lg">
-    <h1>Supplier Gathering</h1>
-    <form>
-        <fieldset>
+<body class="max-w-screen-lg">
+    <div class="p-2" x-data="supplierSelection" @fetchsupplier.window="fetchSupplierData()">
+        <h1>Supplier Gathering</h1>
+        <fieldset class="flex justify-center align-middle gap-2 m-4 p-2 border border-slate-200 rounded">
             <label for="supplier">Supplier
-                <select name="supplier">
-                    <option selected="true">Select a supplier</option>
+                <select name="supplier" x-model="selection" @change="load_disabled = !selection;">
+                    <option value="" selected>Select a supplier</option>
                     {% for supplier in suppliers %}
-                        <option value="{{supplier.value}}">{{supplier.label}}</option>
+                        {% if supplier.value %}
+                            <option value="{{supplier.value}}">{{supplier.label}}</option>
+                        {% endif %}
                     {% endfor %}
                 </select>
             </label>
+            <button type="submit" class="px-4 py-2 rounded font-bold text-white"
+            :class="load_disabled ? 'bg-slate-300' : 'bg-blue-700'"
+            :disabled="load_disabled" @click.prevent="fetchSupplierData()">
+                Load supplier
+            </button>
         </fieldset>
-        <fieldset>
-            <label for="download_type">Download type
-                <select name="download_type">
-                    <option selected="true" disabled>Select a fetch type</option>
-                    <option value="download">download</option>
-                    <option value="automation">automation</option>
-                </select>
-            </label>
-            <label for="download_url">Download URL
-                <input type="url" name="download_url" placeholder="Enter the download URL" />
-            </label>
-        </fieldset>
-        <fieldset>
-            <label for="file_type">File type
-                <select name="file_type">
-                    <option selected="true" disabled>Select a file type</option>
-                    <option value="CSV">CSV</option>
-                    <option value="XML">XML</option>
-                    <option value="XLSX">XLSX</option>
-                </select>
-            </label>
-            <label for="download_path">Download path
-                <input type="input" name="download_path" placeholder="Enter the file save path" />
-            </label>
-            <comment>Filepath relative to X</comment>
-        </fieldset>
-        <fieldset>
-            <button>Save</button>
-        </fieldset>
-    </form>
+    </div>
+    <div class="flex">
+        <form class="border border-slate-200 rounded m-2 p-2"> <!-- New Automation -->
+            <h2 class="text-center font-bold text-lg">New Automation</h2>
+            <fieldset>
+                <label for="download_type">Download type
+                    <select name="download_type">
+                        <option selected="true" disabled>Select a fetch type</option>
+                        <option value="download">download</option>
+                        <option value="automation">automation</option>
+                    </select>
+                </label>
+                <label for="download_url">Download URL
+                    <input type="url" name="download_url" placeholder="Enter the download URL" />
+                </label>
+            </fieldset>
+            <fieldset>
+                <label for="file_type">File type
+                    <select name="file_type">
+                        <option selected="true" disabled>Select a file type</option>
+                        <option value="CSV">CSV</option>
+                        <option value="XML">XML</option>
+                        <option value="XLSX">XLSX</option>
+                    </select>
+                </label>
+                <label for="download_path">Download path
+                    <input type="input" name="download_path" placeholder="Enter the file save path" />
+                </label>
+                <comment>Filepath relative to X</comment>
+            </fieldset>
+            <fieldset>
+                <button>Save</button>
+            </fieldset>
+        </form>
+        <form x-data="currentSupplier" class="border border-slate-200 rounded m-2 p-2"
+            @supplierloaded.window="displaySupplierData($event)"> <!-- Existing Automation -->
+            <h2 class="text-center font-bold text-lg">Existing Automations</h2>
+            <fieldset>
+                <template x-for="automation in automations">
+                    <div class="border-b border-slate-200 m-1 p-1">
+                        <div class="flex align-middle justify-between">
+                            <label :for="automation.id">
+                                <input type="radio" :value="automation.id" :id="automation.id" name="existing_automations" x-model="selected_automation_id">
+                                <span x-text="automation.name + ' (ID: ' + automation.id + ')'"></span>
+                            </label>
+                            <span class="mt-2 mx-2" x-text="automation.type == 0 ? '&#9658; Automation' : '&#11123; Download'"></span>
+                        </div>
+                        <div class="flex align-middle justify-center gap-3">
+                            <span class="text-xs" x-text="'&#128193; ' + automation.location"></span>
+                            <span class="text-xs" x-text="'&#127758; ' + automation.url"></span>
+                        </div>
+                    </div>
+                </template>
+            </fieldset>
+            <fieldset>
+                <button @click.prevent="editSelectedAutomation()" type="button">Edit</button>
+                <button class="bg-red-600" @click.prevent="deleteSelectedAutomation()" type="button">Delete</button>
+            </fieldset>
+        </form>
+    </div>
+    <script type="text/javascript" src="../static/js/supplier.js"></script>
 </body>
 </html>

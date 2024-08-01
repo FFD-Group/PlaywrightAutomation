@@ -30,8 +30,13 @@ __pycache__
 venv
 assets_compiled
 
-# Vite compiled
-assets_compiled
+# downloaded files & recordings
+downloads
+static/recordings/trace
+static/recordings/videos
+
+# generated css
+static/css/styles.css
 
 # Secrets
 .env

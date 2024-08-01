@@ -10,19 +10,32 @@ def index():
     suppliers = get_suppliers()
     return render_template("index.html", suppliers=suppliers)
 
-@app.route("/automation-builder/<string:supplier>")
-def automation_builder(supplier: str):
-    return render_template("automation.html", supplier=supplier)
+@app.route("/automation-builder/<int:supplier_id>/new")
+def automation_builder(supplier_id: int):
+    return render_template("automation.html", supplier_id=supplier_id)
 
-@app.route("/test-automation/<string:supplier>", methods=['POST'])
-def test_automation(supplier: str):
+@app.route("/test-automation/<int:supplier_id>", methods=['POST'])
+def test_automation(supplier_id: int):
     data = request.get_json()
-    print("Data received from POST!")
-    print(data)
-    builder = AutomationBuilder(supplier, data)
+    builder = AutomationBuilder(supplier_id, data)
     automation = builder.build_automation()
     test_results = builder.test_automation(automation)
     return test_results
+
+@app.route("/automations/<int:supplier_id>")
+def get_automations(supplier_id: int):
+    existing_automations = query_db("SELECT * FROM automations WHERE supplier_id = ?", (supplier_id,))
+    result = [dict(row) for row in existing_automations]
+    print(result)
+    return result
+
+@app.route("/automation/<int:supplier_id>/<int:automation_id>/edit")
+def edit_automation(supplier_id: int, automation_id: int):
+    return f"Edit {supplier_id} automation with ID: {automation_id}."
+
+@app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
+def delete_automation(supplier_id: int, automation_id: int):
+    return f"Delete {supplier_id} automation with ID: {automation_id}."
 
 @app.teardown_appcontext
 def close_connection(exception) -> None:
