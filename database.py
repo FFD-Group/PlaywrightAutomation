@@ -1,3 +1,4 @@
+from typing import List
 from flask import g
 
 import sqlite3
@@ -16,3 +17,19 @@ def query_db(query, args=(), one=False) -> sqlite3.Row|str|None:
     rv = cur.fetchall()
     cur.close()
     return (rv[0] if rv else None) if one else rv
+
+def insert_to_db(query, args=()) -> int|None:
+    db = get_db()
+    cur = db.cursor().execute(query, args)
+    result = cur.lastrowid
+    db.commit()
+    return result
+    
+def delete_from_db(query, args=(), returning=None) -> List[str]|str|None:
+    query = f"{query} RETURNING {returning}" if returning else query
+    db = get_db()
+    cur = db.cursor().execute(query, args).fetchall()
+    db.commit()
+    return cur if returning else None
+
+    

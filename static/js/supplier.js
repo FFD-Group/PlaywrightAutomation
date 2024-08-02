@@ -7,8 +7,6 @@ document.addEventListener('alpine:init', () => {
 
         displaySupplierData(event) {
             // Load supplier data from event
-            console.log("Supplier data loading...");
-            console.log(event.detail);
             this.automations = event.detail.automations;
             this.supplier_id = event.detail.supplier_id;
         },
@@ -35,12 +33,7 @@ document.addEventListener('alpine:init', () => {
             .catch((error) => {
                 console.error(error);
             })
-        },
-
-        // editSelectedAutomation() {
-        //     let edit_url = new URL("/automation/" + this.supplier_id + "/" + this.selected_automation_id + "/edit", document.baseURI).href;
-        //     window.location.href = edit_url;
-        // }
+        }
     }));
 
     Alpine.data('supplierSelection', () => ({
@@ -48,7 +41,6 @@ document.addEventListener('alpine:init', () => {
         load_disabled: true,
 
         fetchSupplierData() {
-            // Fetch supplier data and dispatch event 'supplierloaded'
             fetch("/automations/" + this.selection, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
@@ -85,21 +77,22 @@ document.addEventListener('alpine:init', () => {
         supplier_id: null,
 
         save() {
-            if (!Alpine.store('supplierId')) {
+            this.supplier_id = Alpine.store('supplierId');
+            if (!this.supplier_id) {
                 alert("Please select and load a supplier first.");
                 return;
             }
             if (this.type == 0) { // automation type
-                // send user to builder with data
-                let url = new URL("/automations/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location));
+                let url = new URL("/automation-builder/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location), document.baseURI);
                 window.location.href = url;
-            } 
+            }   
             // download type                
             data = {
                 supplier_id: Alpine.store('supplierId'),
                 automation_name: this.name,
                 save_location: this.location,
-                download_url: this.url
+                download_url: this.url,
+                supplier_name: Alpine.store('selectedSupplierLabel')
             };
             fetch("/automations/download/save", {
                 method: 'POST',
@@ -113,7 +106,7 @@ document.addEventListener('alpine:init', () => {
                 return response.json()
             })
             .then((inserted_row) => {
-                alert("Inserted row with ID: " + inserted_row);
+                alert("Inserted download with ID: " + inserted_row);
             })
             .finally(() => {
                 // Reload the existing automation list

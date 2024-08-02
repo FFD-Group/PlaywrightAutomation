@@ -1,6 +1,6 @@
-from flask import Flask, g, render_template, request, redirect, url_for
+from flask import Flask, g, json, render_template, request, redirect, url_for
 from automation_builder import AutomationBuilder
-from database import get_db, query_db
+from database import get_db, query_db, insert_to_db, delete_from_db
 from suppliers import get_suppliers
 
 app = Flask(__name__, static_folder="static/")
@@ -16,15 +16,17 @@ def save_download():
     print(data)
     try:
         ## INSERT SUPPLIER ROW
-        inserted = query_db(
-            "INSERT INTO automations (type, url, location, name, supplier_id) VALUES (?,?,?,?,?)",
-            (1, data["download_url"], data["save_location"], data["automation_name"], data["supplier_id"])
+        insert_to_db(
+            "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
+            {"id":int(data["supplier_id"]), "name":data["supplier_name"]}
         )
-        result = [dict(row) for row in inserted]
-        print(result)
+        inserted = insert_to_db(
+            "INSERT INTO automations (type, url, location, name, supplier_id) VALUES (:type,:url,:location,:name,:supplier_id)", #(type, url, location, name, supplier_id) 
+            {"type":1, "url":data["download_url"], "location":data["save_location"], "name":data["automation_name"], "supplier_id":int(data["supplier_id"])}
+        )
+        return json.dumps(inserted)
     except Exception as e:
         print(e)
-    return result
 
 @app.route("/automation-builder/<int:supplier_id>/new")
 def automation_builder(supplier_id: int):
@@ -47,7 +49,12 @@ def get_automations(supplier_id: int):
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
 def delete_automation(supplier_id: int, automation_id: int):
-    return f"Delete {supplier_id} automation with ID: {automation_id}."
+    deleted_automations = delete_from_db("DELETE FROM automations WHERE id = ? AND supplier_id = ?", (automation_id, supplier_id))
+    result = {}
+    if deleted_automations:
+        result = [dict(row) for row in deleted_automations]
+        print(result)
+    return result
 
 @app.teardown_appcontext
 def close_connection(exception) -> None:
