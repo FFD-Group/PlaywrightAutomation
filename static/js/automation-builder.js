@@ -1,5 +1,17 @@
 document.addEventListener('alpine:init', () => {
 
+    Alpine.data('automationInfo', () => ({
+        name: '',
+        save_location: '',
+
+        loadParameters() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            this.name = urlParams.get("name");
+            this.save_location = urlParams.get("save_location");
+        }
+    }));
+
     Alpine.data('action', () => ({
         form_els: [],
         action: '',

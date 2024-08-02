@@ -15,7 +15,6 @@ def save_download():
     data = request.get_json()
     print(data)
     try:
-        ## INSERT SUPPLIER ROW
         insert_to_db(
             "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
             {"id":int(data["supplier_id"]), "name":data["supplier_name"]}
@@ -30,7 +29,12 @@ def save_download():
 
 @app.route("/automation-builder/<int:supplier_id>/new")
 def automation_builder(supplier_id: int):
-    return render_template("automation.html", supplier_id=supplier_id)
+    supplier_name = request.args.get('supplier_name')
+    insert_to_db(
+        "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
+        {"id":supplier_id, "name":supplier_name}
+    )
+    return render_template("automation.html", supplier_id=supplier_id, supplier_name=supplier_name)
 
 @app.route("/test-automation/<int:supplier_id>", methods=['POST'])
 def test_automation(supplier_id: int):

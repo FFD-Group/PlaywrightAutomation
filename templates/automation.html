@@ -9,6 +9,9 @@
 </head>
 <body>
     <h1>Automation Builder</h1>
+    <div class="border border-slate-300 rounded m-1 p-2" x-data="automationInfo" x-init="loadParameters()">
+        <p>Creating new automation: <span x-text="name"></span> for {{ supplier_name }} (ID: {{ supplier_id }}). Save location: <span x-text="save_location"></span></p>
+    </div>
     <div id="automation_builder" class="container flex min-w-96 w-full gap-2 min-h-96">
         <div id="actionlist" class="border border-slate-200 rounded w-1/3 flex flex-col gap-0.5">
             <div class="action pwclick" x-data="action" x-init="constructor($el)" :id="$id('action')"
@@ -192,9 +195,9 @@
                     </label>
                 </div>
             </div>
-            <form action="/test-automation/{{ supplier }}" id="submit_form" method="POST" class="flex w-full justify-center border-t border-slate-300">
+            <form action="/test-automation/{{ supplier_id }}" id="submit_form" method="POST" class="flex w-full justify-center border-t border-slate-300">
                 <fieldset class="flex-row max-w-screen-sm w-96">
-                    <button class="bg-slate-200 text-slate-500">Cancel</button>
+                    <button @click.prevent="window.location.href = '/';" class="bg-slate-200 text-slate-500">Cancel</button>
                     <button @click.prevent="saveAutomation()">Save & Test</button>
                 </fieldset>
             </form>

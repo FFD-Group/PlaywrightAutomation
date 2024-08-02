@@ -83,7 +83,8 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             if (this.type == 0) { // automation type
-                let url = new URL("/automation-builder/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location), document.baseURI);
+                supplier_name = Alpine.store('selectedSupplierLabel');
+                let url = new URL("/automation-builder/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location) + "&supplier_name=" + encodeURIComponent(supplier_name), document.baseURI);
                 window.location.href = url;
             }   
             // download type                
