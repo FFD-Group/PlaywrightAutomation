@@ -198,7 +198,7 @@
             <form action="/test-automation/{{ supplier_id }}" id="submit_form" method="POST" class="flex w-full justify-center border-t border-slate-300">
                 <fieldset class="flex-row max-w-screen-sm w-96">
                     <button @click.prevent="window.location.href = '/';" class="bg-slate-200 text-slate-500">Cancel</button>
-                    <button @click.prevent="saveAutomation()">Save & Test</button>
+                    <button @click.prevent="testAutomation()">Test Automation</button>
                 </fieldset>
             </form>
             <dialog id="invalidDialog" class="p-2 rounded">
@@ -257,11 +257,19 @@
                             </div>
                         </template>
                     </section>
+                    <section>
+                        <button type="button" @click.prevent="saveAutomation()">Save Automation</button>
+                    </section>
                 </div>
             </div>
         </div>
     </div>
     
+    <script type="text/javascript">
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('supplierId', {{ supplier_id }});
+        });
+    </script>
     <script type="text/javascript" src="../../static/js/automation-builder.js"></script>
 </body>
 </html>

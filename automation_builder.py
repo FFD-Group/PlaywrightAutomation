@@ -51,6 +51,7 @@ class AutomationBuilder:
             "error": None,
             "video": "",
             "trace": "",
+            "steps": automation,
             "downloads": []
         }
         try:

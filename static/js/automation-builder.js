@@ -184,7 +184,7 @@ document.addEventListener('alpine:init', () => {
             return finalActionList;
         },
 
-        saveAutomation() {
+        testAutomation() {
             if (!this.validate()) {
                 this._openInvalidDialog();
                 return;
@@ -224,6 +224,41 @@ document.addEventListener('alpine:init', () => {
             this.data = event.detail;
             this.show_report = true;
             document.getElementById("video_element").load();
+        },
+
+        saveAutomation() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            automation_name = urlParams.get("name");
+            save_location = urlParams.get("save_location");
+            data = {
+                url: this.data["steps"][0]["url"],
+                location: save_location,
+                name: automation_name,
+                supplier_id: Alpine.store('supplierId'),
+                steps: this.data["steps"]
+            };
+
+            console.debug(data);
+
+            fetch("/automations/" + data["supplier_id"] + "/save", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then((stream) => {
+                console.log("data submitted...");
+                if (stream.ok) {
+                    return stream.json();
+                }
+                throw new error("Response was not OK! Status: " + stream.status) 
+            })
+            .then((json) => {
+                console.log(json);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
         }
     }));
 });

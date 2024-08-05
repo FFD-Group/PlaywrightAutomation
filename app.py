@@ -1,5 +1,5 @@
 from flask import Flask, g, json, render_template, request, redirect, url_for
-from automations import create_automation, delete_automation
+from automations import create_automation, delete_automation, save_automation_steps
 from automation_builder import AutomationBuilder
 from database import get_db, query_db, insert_to_db, delete_from_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
@@ -28,6 +28,18 @@ def automation_builder(supplier_id: int):
     create_supplier(supplier_name, supplier_id)
     return render_template("automation.html", supplier_id=supplier_id, supplier_name=supplier_name)
 
+@app.route("/automations/<int:supplier_id>/save", methods=['POST'])
+def save_automation(supplier_id: int):
+    data = request.get_json()
+    supplier_name = request.args.get('supplier_name')
+    try:
+        create_supplier(supplier_name, supplier_id)
+        automation_id = create_automation(0, data["url"], data["location"], data["name"], supplier_id)
+        save_automation_steps(automation_id, json.dumps(data["steps"]))
+        return json.dumps(automation_id)
+    except Exception as e:
+        print(e)
+
 @app.route("/test-automation/<int:supplier_id>", methods=['POST'])
 def test_automation(supplier_id: int):
     data = request.get_json()
@@ -44,7 +56,7 @@ def get_automations(supplier_id: int):
     return result
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
-def delete_automation(supplier_id: int, automation_id: int):
+def delete_supplier_automation(supplier_id: int, automation_id: int):
     deleted_automations = delete_automation(automation_id, supplier_id)
     result = {}
     if deleted_automations:

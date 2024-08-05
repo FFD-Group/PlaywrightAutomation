@@ -2,6 +2,7 @@ BEGIN TRANSACTION;
 
 DROP TABLE IF EXISTS automations;
 DROP TABLE IF EXISTS suppliers;
+DROP TABLE IF EXISTS steps;
 
 CREATE TABLE suppliers (
     id UNSIGNED INTEGER PRIMARY KEY,
@@ -17,6 +18,14 @@ CREATE TABLE automations (
     supplier_id UNSIGNED INTEGER,
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
         ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+CREATE TABLE steps (
+    automation_id INTEGER PRIMARY KEY,
+    automation_steps TEXT NOT NULL,
+    FOREIGN KEY (automation_id) REFERENCES automations(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );
 
 COMMIT;
