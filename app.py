@@ -1,7 +1,8 @@
 from flask import Flask, g, json, render_template, request, redirect, url_for
+from automations import create_automation, delete_automation
 from automation_builder import AutomationBuilder
 from database import get_db, query_db, insert_to_db, delete_from_db
-from suppliers import get_suppliers
+from suppliers import get_suppliers, create_supplier, get_supplier_automations
 
 app = Flask(__name__, static_folder="static/")
 
@@ -15,25 +16,16 @@ def save_download():
     data = request.get_json()
     print(data)
     try:
-        insert_to_db(
-            "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
-            {"id":int(data["supplier_id"]), "name":data["supplier_name"]}
-        )
-        inserted = insert_to_db(
-            "INSERT INTO automations (type, url, location, name, supplier_id) VALUES (:type,:url,:location,:name,:supplier_id)", #(type, url, location, name, supplier_id) 
-            {"type":1, "url":data["download_url"], "location":data["save_location"], "name":data["automation_name"], "supplier_id":int(data["supplier_id"])}
-        )
-        return json.dumps(inserted)
+        create_supplier(data["supplier_name"], data["supplier_id"])
+        inserted_id = create_automation(1, data["download_url"], data["save_location"], data["automation_name"], data["supplier_id"])
+        return json.dumps(inserted_id)
     except Exception as e:
         print(e)
 
 @app.route("/automation-builder/<int:supplier_id>/new")
 def automation_builder(supplier_id: int):
     supplier_name = request.args.get('supplier_name')
-    insert_to_db(
-        "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
-        {"id":supplier_id, "name":supplier_name}
-    )
+    create_supplier(supplier_name, supplier_id)
     return render_template("automation.html", supplier_id=supplier_id, supplier_name=supplier_name)
 
 @app.route("/test-automation/<int:supplier_id>", methods=['POST'])
@@ -46,14 +38,14 @@ def test_automation(supplier_id: int):
 
 @app.route("/automations/<int:supplier_id>")
 def get_automations(supplier_id: int):
-    existing_automations = query_db("SELECT * FROM automations WHERE supplier_id = ?", (supplier_id,))
+    existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
     print(result)
     return result
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
 def delete_automation(supplier_id: int, automation_id: int):
-    deleted_automations = delete_from_db("DELETE FROM automations WHERE id = ? AND supplier_id = ?", (automation_id, supplier_id))
+    deleted_automations = delete_automation(automation_id, supplier_id)
     result = {}
     if deleted_automations:
         result = [dict(row) for row in deleted_automations]

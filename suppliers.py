@@ -1,4 +1,6 @@
+from database import insert_to_db, query_db
 from dotenv import load_dotenv
+from sqlite3 import Row
 import requests
 import os
 
@@ -20,3 +22,14 @@ def get_suppliers() -> list:
     else:
         pass
     return []
+
+def create_supplier(name: str, id: int) -> int|None:
+    """Create a new supplier in the database with the given name and ID.
+    Returns the ID of the inserted row or None."""
+    return insert_to_db(
+        "INSERT OR IGNORE INTO suppliers (id, name) VALUES (:id,:name)",
+        {"id":int(id), "name":name}
+    )
+
+def get_supplier_automations(supplier_id: str) -> Row|str|None:
+    return query_db("SELECT * FROM automations WHERE supplier_id = ?", (int(supplier_id),))
