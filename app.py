@@ -14,7 +14,6 @@ def index():
 @app.route("/automations/download/save", methods=['POST'])
 def save_download():
     data = request.get_json()
-    print(data)
     try:
         create_supplier(data["supplier_name"], data["supplier_id"])
         inserted_id = create_automation(1, data["download_url"], data["save_location"], data["automation_name"], data["supplier_id"])
@@ -52,7 +51,6 @@ def test_automation(supplier_id: int):
 def get_automations(supplier_id: int):
     existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
-    print(result)
     return result
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
@@ -61,7 +59,6 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
     result = {}
     if deleted_automations:
         result = [dict(row) for row in deleted_automations]
-        print(result)
     return result
 
 @app.teardown_appcontext
