@@ -213,6 +213,13 @@
                     </template>
                 </ul>
             </dialog>
+            <div x-show="state" class="absolute inset-0">
+                <div class="absolute inset-0 bg-slate-700 opacity-50">
+                </div>
+                <div class="absolute top-1/2 left-1/2 bg-white">
+                    <p class="m-5 px-10 py-5 text-xl font-bold rounded" x-text="state"></p>
+                </div>
+            </div>
         </div>
         <div id="report_container"
             x-data="report"

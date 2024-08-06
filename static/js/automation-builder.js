@@ -63,6 +63,7 @@ document.addEventListener('alpine:init', () => {
         action_list: [],
         start_url: "",
         errors: [],
+        state: '',
         
         dragOverHandler(ev) {
             ev.preventDefault();
@@ -189,6 +190,7 @@ document.addEventListener('alpine:init', () => {
                 this._openInvalidDialog();
                 return;
             }
+            this.state = 'Testing...';
             finalActions = this._buildFinalActionList();
             console.log(finalActions);
             // save, submit etc...
@@ -209,6 +211,7 @@ document.addEventListener('alpine:init', () => {
             .then((json) => {
                 console.log(json);
                 window.dispatchEvent(new CustomEvent("displayreport", {detail: json}));
+                this.state='';
             })
             .catch((error) => {
                 console.error(error);
