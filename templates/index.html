@@ -8,7 +8,10 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="max-w-screen-lg">
-    <div class="p-2" x-data="supplierSelection" @fetchsupplier.window="fetchSupplierData()">
+    <div x-data="flash" x-init="loadMessage" x-show="message" class="absolute top-10 left-5 rounded shadow border border-slate-400 bg-green-200">
+        <p class="py-5 px-10" x-text="message"></p>
+    </div>
+    <div class="p-2" x-data="supplierSelection" x-init="checkPassedSupplier" @fetchsupplier.window="fetchSupplierData()">
         <h1>Supplier Gathering</h1>
         <fieldset class="flex justify-center align-middle gap-2 m-4 p-2 border border-slate-200 rounded">
             <label for="supplier">Supplier
@@ -86,5 +89,6 @@
         </form>
     </div>
     <script type="text/javascript" src="../static/js/supplier.js"></script>
+    <script type="text/javascript" src="../static/js/flash.js"></script>
 </body>
 </html>

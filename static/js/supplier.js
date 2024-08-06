@@ -40,6 +40,16 @@ document.addEventListener('alpine:init', () => {
         selection: null,
         load_disabled: true,
 
+        checkPassedSupplier() {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            passed_supplier = urlParams.get("supplier_id");
+            if (passed_supplier) {
+                this.selection = passed_supplier;
+                this.fetchSupplierData();
+            }
+        },
+
         fetchSupplierData() {
             fetch("/automations/" + this.selection, {
                 method: 'GET',

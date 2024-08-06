@@ -1,7 +1,7 @@
-from flask import Flask, g, json, render_template, request, redirect, url_for
+from flask import Flask, g, json, render_template, request
 from automations import create_automation, delete_automation, save_automation_steps
 from automation_builder import AutomationBuilder
-from database import get_db, query_db, insert_to_db, delete_from_db
+from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
 
 app = Flask(__name__, static_folder="static/")
@@ -35,7 +35,7 @@ def save_automation(supplier_id: int):
         create_supplier(supplier_name, supplier_id)
         automation_id = create_automation(0, data["url"], data["location"], data["name"], supplier_id)
         save_automation_steps(automation_id, json.dumps(data["steps"]))
-        return json.dumps(automation_id)
+        return json.dumps(f"/?automation_id={automation_id}&supplier_id={supplier_id}&supplier_name={supplier_name}")
     except Exception as e:
         print(e)
 

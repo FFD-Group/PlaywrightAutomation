@@ -241,7 +241,7 @@ document.addEventListener('alpine:init', () => {
 
             console.debug(data);
 
-            fetch("/automations/" + data["supplier_id"] + "/save", {
+            fetch("/automations/" + data["supplier_id"] + "/save?supplier_name=" + encodeURIComponent(Alpine.store("supplierName")), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -255,6 +255,7 @@ document.addEventListener('alpine:init', () => {
             })
             .then((json) => {
                 console.log(json);
+                window.location = json;
             })
             .catch((error) => {
                 console.error(error);
