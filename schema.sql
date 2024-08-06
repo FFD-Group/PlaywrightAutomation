@@ -17,7 +17,8 @@ CREATE TABLE automations (
     name VARCHAR(255) NOT NULL,
     supplier_id UNSIGNED INTEGER,
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
-        ON DELETE CASCADE ON UPDATE NO ACTION
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
 );
 
 CREATE TABLE steps (
