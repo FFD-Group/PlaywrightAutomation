@@ -1,14 +1,28 @@
 from flask import Flask, g, json, render_template, request
+from flask_apscheduler import APScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from automations import create_automation, delete_automation, save_automation_steps
 from automation_builder import AutomationBuilder
 from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
+from job_schedule import add_automation_schedule
+
+class Config:
+    SCHEDULER_JOBSTORES = {
+        'default': SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
+    }
 
 app = Flask(__name__, static_folder="static/")
+app.config.from_object(Config())
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
 
 @app.route("/")
 def index():
     suppliers = get_suppliers()
+    add_automation_schedule(scheduler, str(7), {"minute": "*/5"})
     return render_template("index.html", suppliers=suppliers)
 
 @app.route("/automations/download/save", methods=['POST'])
