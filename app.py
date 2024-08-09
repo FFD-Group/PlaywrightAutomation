@@ -5,7 +5,7 @@ from automations import create_automation, delete_automation, save_automation_st
 from automation_builder import AutomationBuilder
 from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
-from job_schedule import add_automation_schedule
+from job_schedule import add_automation_schedule, remove_automation_schedule, pause_automation_schedule, resume_automation_schedule
 
 class Config:
     SCHEDULER_JOBSTORES = {
@@ -19,10 +19,21 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
+def print_jobs(scheduler: APScheduler):
+    jobs = scheduler.get_jobs()
+    print("Jobs")
+    for job in jobs:
+        print(job.id, job.name, job.next_run_time)
+
 @app.route("/")
 def index():
     suppliers = get_suppliers()
-    add_automation_schedule(scheduler, str(7), {"minute": "*/5"})
+    add_automation_schedule(scheduler, str(7), {"hour": "10", "minute": "46"})
+    print_jobs(scheduler)
+    # pause_automation_schedule(scheduler, str(7))
+    # print_jobs(scheduler)
+    # remove_automation_schedule(scheduler, str(7))
+    # print_jobs(scheduler)
     return render_template("index.html", suppliers=suppliers)
 
 @app.route("/automations/download/save", methods=['POST'])

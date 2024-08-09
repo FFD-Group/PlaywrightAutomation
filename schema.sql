@@ -15,6 +15,7 @@ CREATE TABLE automations (
     url VARCHAR(255) NOT NULL,
     location VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    last_run_result VARCHAR(255),
     supplier_id UNSIGNED INTEGER,
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
         ON DELETE CASCADE

@@ -6,6 +6,7 @@ from database import query_db, insert_to_db, delete_from_db
 from playwright.sync_api import sync_playwright
 import playwright_automation
 import time
+from datetime import datetime
 
 def create_automation(type: int, url: str, location: str, name: str, supplier_id: str) -> int|None:
     return insert_to_db(
@@ -28,10 +29,24 @@ def get_automation_steps(automation_id: str) -> str|None:
         "SELECT automation_steps FROM steps WHERE automation_id = ?", (automation_id,)
     )
 
-def run_automation_steps(steps: List) -> None:
+def set_automation_last_run_result(automation_id: str, result: str) -> None:
+    insert_to_db("INSERT INTO automations (last_run_result) VALUES (:result) WHERE id = :id", {"last_run_result":result, "id":automation_id})
 
-    actions = json.loads(steps[0]['automation_steps'])
+def run_automation_steps(automation_id: str, steps: List) -> None:
+    result = "Success, the automations steps ran successfully"
+    if not steps:
+        result = "Failure, could not load automation steps"
+    else:
+        actions = json.loads(steps[0]['automation_steps'])
+        try:
+            perform_actions(actions, automation_id)
+        except Exception as e:
+            print(e)
+            result = "Failure, an error occurred during the automation steps"
+    set_automation_last_run_result(automation_id, result)
 
+def perform_actions(actions: List, automation_id: str) -> None:
+    run_time = datetime.now()
     with sync_playwright() as pw:
         chromium = pw.chromium
         browser = chromium.launch(headless=False)
@@ -58,7 +73,7 @@ def run_automation_steps(steps: List) -> None:
             time.sleep(0.5)
 
         time.sleep(2)
-        video_path = "/static/recordings/videos/" + Path(page.video.path()).name
-        context.tracing.stop(path="static/recordings/traces/trace.zip")
+        trace_filename = f"{automation_id}_trace_" + run_time.strftime("%Y-%m-%d-%H-%M") + ".zip"
+        context.tracing.stop(path="static/recordings/traces/" + trace_filename)
         context.close()
         browser.close()
