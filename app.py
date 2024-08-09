@@ -98,3 +98,15 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+def add_sample_data():
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('sample_data.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+    sample_scheduler = APScheduler()
+    sample_scheduler.init_app(app)
+    sample_scheduler.start()
+    with sample_scheduler.app.app_context():
+        add_automation_schedule(sample_scheduler, str(1), {"hour": "*/1"})
