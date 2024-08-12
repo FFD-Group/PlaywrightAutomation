@@ -72,7 +72,9 @@ def get_automations(supplier_id: int):
     existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
     for automation in result:
-        automation["next_run_time"] = get_automation_next_run_time(scheduler, automation["id"])
+        next_run = get_automation_next_run_time(scheduler, automation["id"])
+        automation["next_run_time"] = next_run if next_run else None
+        
     return result
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])

@@ -31,4 +31,7 @@ def resume_automation_schedule(scheduler: APScheduler, automation_id: str) -> No
     scheduler.resume_job(automation_id)
 
 def get_automation_next_run_time(scheduler: APScheduler, automation_id: str) -> str|None:
-    return scheduler.get_job(automation_id).next_run_time
+    job = scheduler.get_job(automation_id)
+    if job:
+        return job.next_run_time
+    return None

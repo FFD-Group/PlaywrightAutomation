@@ -78,7 +78,7 @@
                         <div x-show="!collapsed" class="align-middle justify-center text-xs mt-2 bg-white">
                             <p class="even:bg-slate-100 font-bold p-2">Save location: <span class="font-normal" x-text="automation.location"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2 truncate max-w-md">Start URL: <span class="font-normal" x-text="automation.url"></span></p>
-                            <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="new Date(automation.next_run_time).toLocaleString('en-GB',{'hour12':'true','weekday':'short','month':'short','day':'numeric','dayPeriod':'narrow','hour':'numeric','minute':'2-digit'})"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="automation.next_run_time? Date(automation.next_run_time).toLocaleString('en-GB',{'hour12':'true','weekday':'short','month':'short','day':'numeric','dayPeriod':'narrow','hour':'numeric','minute':'2-digit'}): 'Unscheduled'"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
                             <form id="schedule" class="flex">
