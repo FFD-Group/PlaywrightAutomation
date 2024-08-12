@@ -130,4 +130,50 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
+    Alpine.data('existingAutomation', () => ({
+        collapsed: true,
+        schedule,
+        customtime: null,
+        error: null,
+
+        schedule_automation(event, automation_id) {
+            event.preventDefault();
+            console.debug(this.schedule);
+            console.debug(this.customtime);
+            if (!this.schedule || (this.schedule == 'custom' && !this.customtime)) {
+                this.error = 'Invalid entry.';
+                return;
+            }
+            this.error = null;
+
+            if (this.schedule != 'custom') {
+                this.customtime = null;
+            }
+
+            // fetch to endpoint to set automation schedule
+            data = {
+                schedule: this.schedule,
+                time: this.customtime
+            };
+
+            fetch("/schedule/" + automation_id, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    console.error(response.error);
+                }
+                return response.json();
+            })
+            .then((next_run_time) => {
+                console.log(next_run_time);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        }
+    }));
+
 });

@@ -29,6 +29,9 @@ def get_automation_steps(automation_id: str) -> str|None:
         "SELECT automation_steps FROM steps WHERE automation_id = ?", (automation_id,)
     )
 
+def set_automation_schedule(automation_id: str, schedule: str) -> None:
+    return insert_to_db("UPDATE automations SET schedule = (:schedule) WHERE id = (:id)", {"schedule":schedule, "id":automation_id})
+
 def set_automation_last_run_result(automation_id: str, result: str) -> None:
     insert_to_db("INSERT INTO automations (last_run_result) VALUES (:result) WHERE id = :id", {"last_run_result":result, "id":automation_id})
 

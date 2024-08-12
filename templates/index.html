@@ -31,7 +31,7 @@
             </button>
         </fieldset>
     </div>
-    <div class="flex">
+    <div class="flex w-full">
         <form class="border border-slate-200 rounded m-2 p-2" x-data="newAutomation"> <!-- New Automation -->
             <h2 class="text-center font-bold text-lg">New Automation</h2>
             <fieldset>
@@ -65,17 +65,38 @@
             <h2 class="text-center font-bold text-lg" x-text="Alpine.store('selectedSupplierLabel') ? Alpine.store('selectedSupplierLabel') + ' Automations' : 'Existing Automations'"></h2>
             <fieldset>
                 <template x-for="automation in automations">
-                    <div class="border-b border-slate-200 m-1 p-1">
+                    <div x-data="existingAutomation" class="border border-slate-200 rounded m-1 p-1 w-full max-w-full even:bg-blue-50">
                         <div class="flex align-middle justify-between">
                             <label :for="automation.id">
                                 <input type="radio" :value="automation.id" :id="automation.id" name="existing_automations" x-model="selected_automation_id">
                                 <span x-text="automation.name + ' (ID: ' + automation.id + ')'"></span>
                             </label>
-                            <span class="mt-2 mx-2" x-text="automation.type == 0 ? '&#9658; Automation' : '&#11123; Download'"></span>
+                            <p class="mt-2 mx-2" x-text="automation.type == 0 ? 'Automation' : 'Download'"></p>
+                            <p :class="(automation.last_run_result) ? (automation.last_run_result?.includes('Success') ? 'bg-green-600' : 'bg-red-600') : 'bg-slate-300'" class="rounded-full w-5 h-5 mt-2 mx-2" :title="automation.next_run_time"></p>
+                            <p class="mt-2 mx-2 text-lg cursor-pointer" @click="collapsed = !collapsed" x-text="collapsed ? '&plus;' : '&minus;'"></p>
                         </div>
-                        <div class="flex align-middle justify-center gap-3">
-                            <span class="text-xs" x-text="'&#128193; ' + automation.location"></span>
-                            <span class="text-xs" x-text="'&#127758; ' + automation.url"></span>
+                        <div x-show="!collapsed" class="align-middle justify-center text-xs mt-2 bg-white">
+                            <p class="even:bg-slate-100 font-bold p-2">Save location: <span class="font-normal" x-text="automation.location"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2 truncate max-w-md">Start URL: <span class="font-normal" x-text="automation.url"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="automation.next_run_time"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
+                            <form id="schedule" class="flex">
+                                <label class="font-bold" for="schedule">Schedule:
+                                    <select x-model="schedule">
+                                        <option selected>Select a schedule...</option>
+                                        <option value="hourly">Every hour</option>
+                                        <option value="threeaday">3 times a day (8am, Noon & 4pm)</option>
+                                        <option value="daily">Every day</option>
+                                        <option value="custom">Daily at custom time</option>
+                                    </select>
+                                </label>
+                                <label for="time" x-show="schedule == 'custom'">Time:
+                                    <input type="time" name="time" x-model="customtime" :required="(schedule == 'custom')" />
+                                </label>
+                                <button @click="schedule_automation($event, automation.id)" class="py-1" type="button">Schedule</button>
+                            </form>
+                            <p x-show="error" class="text-xs text-red-700 text-center italic font-bold" x-text="error"></p>
                         </div>
                     </div>
                 </template>
@@ -88,7 +109,7 @@
             </fieldset>
         </form>
     </div>
-    <script type="text/javascript" src="../static/js/supplier.js"></script>
+    <script type="text/javascript" src="../static/js/index.js"></script>
     <script type="text/javascript" src="../static/js/flash.js"></script>
 </body>
 </html>

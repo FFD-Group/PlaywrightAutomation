@@ -1,11 +1,11 @@
 from flask import Flask, g, json, render_template, request
 from flask_apscheduler import APScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from automations import create_automation, delete_automation, save_automation_steps
+from automations import create_automation, delete_automation, save_automation_steps, set_automation_schedule
 from automation_builder import AutomationBuilder
 from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
-from job_schedule import add_automation_schedule, remove_automation_schedule, pause_automation_schedule, resume_automation_schedule
+from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 
 class Config:
     SCHEDULER_JOBSTORES = {
@@ -25,6 +25,8 @@ def print_jobs(scheduler: APScheduler):
     for job in jobs:
         print(job.id, job.name, job.next_run_time)
 
+## INDEX
+
 @app.route("/")
 def index():
     suppliers = get_suppliers()
@@ -36,6 +38,8 @@ def index():
     # print_jobs(scheduler)
     return render_template("index.html", suppliers=suppliers)
 
+## DOWNLOADS
+
 @app.route("/automations/download/save", methods=['POST'])
 def save_download():
     data = request.get_json()
@@ -45,6 +49,8 @@ def save_download():
         return json.dumps(inserted_id)
     except Exception as e:
         print(e)
+
+## AUTOMATIONS
 
 @app.route("/automation-builder/<int:supplier_id>/new")
 def automation_builder(supplier_id: int):
@@ -85,6 +91,22 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
     if deleted_automations:
         result = [dict(row) for row in deleted_automations]
     return result
+
+## SCHEDULES
+
+@app.route("/schedule/<string:automation_id>", methods=['POST'])
+def schedule_automation(automation_id: str):
+    data = request.get_json()
+    schedule = data["schedule"]
+    cron = CRON_SCHEDULES[schedule]
+    if schedule == "custom":
+        cron["hour"],cron["minute"] = data["time"].split(":")
+    set_automation_schedule(automation_id, json.dumps(cron))
+    add_automation_schedule(scheduler, automation_id, cron)
+    next_run = get_automation_next_run_time(scheduler, automation_id)
+    return json.dumps(next_run.strftime("%d/%m/%Y at %H:%m"))
+
+## DATABASE
 
 @app.teardown_appcontext
 def close_connection(exception) -> None:
