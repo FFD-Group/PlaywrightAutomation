@@ -1,11 +1,6 @@
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from flask import Flask, g, json, render_template, request
 from flask_apscheduler import APScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from automations import create_automation, delete_automation, save_automation_steps, set_automation_schedule
-from automation_builder import AutomationBuilder
-from database import get_db
-from suppliers import get_suppliers, create_supplier, get_supplier_automations
-from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 
 class Config:
     SCHEDULER_JOBSTORES = {
@@ -19,23 +14,17 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-def print_jobs(scheduler: APScheduler):
-    jobs = scheduler.get_jobs()
-    print("Jobs")
-    for job in jobs:
-        print(job.id, job.name, job.next_run_time)
+from automations import create_automation, delete_automation, save_automation_steps, set_automation_schedule
+from automation_builder import AutomationBuilder
+from database import get_db
+from suppliers import get_suppliers, create_supplier, get_supplier_automations
+from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 
 ## INDEX
 
 @app.route("/")
 def index():
     suppliers = get_suppliers()
-    add_automation_schedule(scheduler, str(7), {"hour": "10", "minute": "46"})
-    print_jobs(scheduler)
-    # pause_automation_schedule(scheduler, str(7))
-    # print_jobs(scheduler)
-    # remove_automation_schedule(scheduler, str(7))
-    # print_jobs(scheduler)
     return render_template("index.html", suppliers=suppliers)
 
 ## DOWNLOADS
@@ -82,6 +71,8 @@ def test_automation(supplier_id: int):
 def get_automations(supplier_id: int):
     existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
+    for automation in result:
+        automation["next_run_time"] = get_automation_next_run_time(scheduler, automation["id"])
     return result
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
@@ -101,10 +92,10 @@ def schedule_automation(automation_id: str):
     cron = CRON_SCHEDULES[schedule]
     if schedule == "custom":
         cron["hour"],cron["minute"] = data["time"].split(":")
-    set_automation_schedule(automation_id, json.dumps(cron))
+    set_automation_schedule(automation_id, schedule)
     add_automation_schedule(scheduler, automation_id, cron)
     next_run = get_automation_next_run_time(scheduler, automation_id)
-    return json.dumps(next_run.strftime("%d/%m/%Y at %H:%m"))
+    return json.dumps(next_run)
 
 ## DATABASE
 

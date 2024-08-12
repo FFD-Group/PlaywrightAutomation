@@ -1,11 +1,12 @@
 from flask_apscheduler import APScheduler
-from automations import get_automation_steps, run_automation_steps
+from automations import get_automation_steps
+from automation_runner import run_automation_steps
 
 CRON_SCHEDULES = {
     "hourly": {"hour": "*/1"},
     "threeaday": {"hour": "8,12,16"},
-    "daily": {"day": "1-5"},
-    "custom": {"day": "1-5", "hour": None, "minute": None}
+    "daily": {"day": "*/1", "day_of_week": "0-4"},
+    "custom": {"day": "*/1", "hour": None, "minute": None, "day_of_week": "0-4"}
 }
 
 def add_automation_schedule(scheduler: APScheduler, automation_id: str, cron: dict) -> None:

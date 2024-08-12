@@ -168,7 +168,9 @@ document.addEventListener('alpine:init', () => {
                 return response.json();
             })
             .then((next_run_time) => {
-                console.log(next_run_time);
+                let next_run_datetime = new Date(next_run_time);
+                alert("Schedule has been changed to " + this.schedule + ", next run time will be: " + next_run_datetime.toLocaleString());
+                window.dispatchEvent(new CustomEvent("fetchsupplier"));
             })
             .catch((error) => {
                 console.error(error);
