@@ -143,9 +143,12 @@ document.addEventListener('alpine:init', () => {
             if (schedule && !next_run_time) { // Paused
                 return 'bg-amber-400';
             }
-            successful = last_run_result.includes('Success'); // Running
-            if (successful) return 'bg-green-600';
-            return 'bg-red-600';
+            if (last_run_result) {
+                successful = last_run_result.includes('Success'); // Running
+                if (successful) return 'bg-green-600';
+                return 'bg-red-600';
+            }
+            return 'bg-slate-300'; // Default
         },
 
         get_formatted_run_time(next_run_time) {
