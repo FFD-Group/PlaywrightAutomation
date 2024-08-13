@@ -40,8 +40,8 @@ def playwright_click_download(page: Page, type: str, text: str, input: str) -> s
         element.click()
     # Save the downloaded file
     download = download_info.value
-    download.save_as("downloads/" + download.suggested_filename)
-    return f"downloads/{download.suggested_filename}"
+    download.save_as("static/downloads/" + download.suggested_filename)
+    return f"static/downloads/{download.suggested_filename}"
 
 def playwright_fill_input(page: Page, type: str, text: str, input: str) -> None:
     if type:
