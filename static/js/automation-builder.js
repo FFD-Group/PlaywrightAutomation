@@ -33,6 +33,11 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        deleteAction(el) {
+            let target = document.getElementById("target");
+            target.removeChild(el.parentNode);
+        },
+
         populateFormElements(el) {
             el.querySelectorAll("select,input").forEach((htmlFormEl) => {
                 let required = htmlFormEl.hasAttribute("required");
@@ -76,6 +81,11 @@ document.addEventListener('alpine:init', () => {
             ev.preventDefault();
             let dropTarget = document.getElementById("target");
             let newAction = Alpine.store("dragged").cloneNode(true);
+            // add a delete button which deletes the action from the list...
+            let deleteButton = document.createElement("button");
+            deleteButton.setAttribute('x-on:click.prevent', 'deleteAction($el)');
+            deleteButton.appendChild(document.createTextNode("X"));
+            newAction.appendChild(deleteButton);
             newAction.classList.remove("dragging");
             dropTarget.appendChild(newAction);
             this.action_list.push(newAction);
@@ -84,6 +94,7 @@ document.addEventListener('alpine:init', () => {
             newAction.insertBefore(title, grabhandle);
             newAction.removeChild(grabhandle);
             newAction.removeAttribute("draggable");
+            console.debug(this.action_list);
         },
 
         clearList() {
