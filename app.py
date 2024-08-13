@@ -1,6 +1,7 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from flask import Flask, g, json, render_template, request
 from flask_apscheduler import APScheduler
+from datetime import datetime
 
 class Config:
     SCHEDULER_JOBSTORES = {
@@ -72,7 +73,7 @@ def get_automations(supplier_id: int):
     existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
     for automation in result:
-        next_run = get_automation_next_run_time(scheduler, automation["id"])
+        next_run: datetime = get_automation_next_run_time(scheduler, automation["id"])
         automation["next_run_time"] = next_run if next_run else None
         
     return result

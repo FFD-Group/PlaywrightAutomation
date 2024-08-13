@@ -72,15 +72,23 @@
                                 <span x-text="automation.name + ' (ID: ' + automation.id + ')'"></span>
                             </label>
                             <p class="mt-2 mx-2" x-text="automation.type == 0 ? 'Automation' : 'Download'"></p>
-                            <p :class="(automation.last_run_result) ? (automation.last_run_result?.includes('Success') ? 'bg-green-600' : 'bg-red-600') : 'bg-slate-300'" class="rounded-full w-5 h-5 mt-2 mx-2" :title="automation.next_run_time"></p>
+                            <p :class="get_automation_status_colour(automation.last_run_result, automation.next_run_time, automation.schedule)" class="rounded-full w-5 h-5 mt-2 mx-2" :title="automation.next_run_time"></p>
                             <p class="mt-2 mx-2 text-lg cursor-pointer" @click="collapsed = !collapsed" x-text="collapsed ? '&plus;' : '&minus;'"></p>
                         </div>
                         <div x-show="!collapsed" class="align-middle justify-center text-xs mt-2 bg-white">
                             <p class="even:bg-slate-100 font-bold p-2">Save location: <span class="font-normal" x-text="automation.location"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2 truncate max-w-md">Start URL: <span class="font-normal" x-text="automation.url"></span></p>
-                            <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="automation.next_run_time? Date(automation.next_run_time).toLocaleString('en-GB',{'hour12':'true','weekday':'short','month':'short','day':'numeric','dayPeriod':'narrow','hour':'numeric','minute':'2-digit'}): 'Unscheduled'"></span></p>
+                            <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="get_formatted_run_time(automation.next_run_time)"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
-                            <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
+                            <div class="flex justify-between">
+                                <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
+                                <div x-show="automation.next_run_time && automation.schedule">
+                                    <p class="underline">PAUSE</p>
+                                </div>
+                                <div x-show="!automation.next_run_time && automation.schedule">
+                                    <p class="underline">RESUME</p>
+                                </div>
+                            </div>
                             <form id="schedule" class="flex">
                                 <label class="font-bold" for="schedule">Schedule:
                                     <select x-model="schedule">

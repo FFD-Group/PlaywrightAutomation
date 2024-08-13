@@ -136,6 +136,36 @@ document.addEventListener('alpine:init', () => {
         customtime: null,
         error: null,
 
+        get_automation_status_colour(last_run_result, next_run_time, schedule) {
+            if (!schedule) { // Unscheduled
+                return 'bg-slate-300';
+            }
+            if (schedule && !next_run_time) { // Paused
+                return 'bg-amber-400';
+            }
+            successful = last_run_result.includes('Success'); // Running
+            if (successful) return 'bg-green-600';
+            return 'bg-red-600';
+        },
+
+        get_formatted_run_time(next_run_time) {
+            console.debug(next_run_time);
+            if (next_run_time) {
+                result = new Date(next_run_time);
+                formatted = result.toLocaleString('en-GB', {
+                    'hour12': true,
+                    'weekday': 'short',
+                    'month': 'short',
+                    'day': 'numeric',
+                    'dayPeriod': 'narrow',
+                    'hour': 'numeric',
+                    'minute': '2-digit'
+                });
+                return formatted;
+            }
+            return 'Unscheduled';
+        },
+
         schedule_automation(event, automation_id) {
             event.preventDefault();
             console.debug(this.schedule);
