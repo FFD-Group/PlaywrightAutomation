@@ -7,6 +7,7 @@ class Config:
     SCHEDULER_JOBSTORES = {
         'default': SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
     }
+    SCHEDULER_API_ENABLED = True
 
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())

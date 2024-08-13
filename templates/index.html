@@ -80,16 +80,16 @@
                             <p class="even:bg-slate-100 font-bold p-2 truncate max-w-md">Start URL: <span class="font-normal" x-text="automation.url"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="get_formatted_run_time(automation.next_run_time)"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
-                            <div class="flex justify-between">
+                            <div class="flex justify-around items-center">
                                 <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
                                 <div x-show="automation.next_run_time && automation.schedule">
-                                    <p class="underline">PAUSE</p>
+                                    <button @click.prevent="pause_automation(automation.id)" class="m-0 py-0 px-4 text-xs bg-amber-300 text-black" type="button">Pause</button>
                                 </div>
                                 <div x-show="!automation.next_run_time && automation.schedule">
-                                    <p class="underline">RESUME</p>
+                                    <button @click.prevent="resume_automation(automation.id)" class="m-0 py-0 px-4 text-xs" type="button">Resume</button>
                                 </div>
                             </div>
-                            <form id="schedule" class="flex">
+                            <form id="schedule" class="flex items-center">
                                 <label class="font-bold" for="schedule">Schedule:
                                     <select x-model="schedule">
                                         <option selected>Select a schedule...</option>
@@ -102,7 +102,7 @@
                                 <label for="time" x-show="schedule == 'custom'">Time:
                                     <input type="time" name="time" x-model="customtime" :required="(schedule == 'custom')" />
                                 </label>
-                                <button @click="schedule_automation($event, automation.id)" class="py-1" type="button">Schedule</button>
+                                <button @click="schedule_automation($event, automation.id)" class="py-1 bg-blue-600" type="button">Schedule</button>
                             </form>
                             <p x-show="error" class="text-xs text-red-700 text-center italic font-bold" x-text="error"></p>
                         </div>

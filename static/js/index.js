@@ -74,7 +74,7 @@ document.addEventListener('alpine:init', () => {
                 Alpine.store("supplierId", this.selection);
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
             });
         }
     }));
@@ -149,7 +149,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         get_formatted_run_time(next_run_time) {
-            console.debug(next_run_time);
             if (next_run_time) {
                 result = new Date(next_run_time);
                 formatted = result.toLocaleString('en-GB', {
@@ -166,10 +165,54 @@ document.addEventListener('alpine:init', () => {
             return 'Unscheduled';
         },
 
+        pause_automation(automation_id) {
+            if (!confirm("Really pause the schedule for job with ID: " + automation_id + "?")) {
+                return;
+            }
+            fetch("/scheduler/jobs/" + automation_id + "/pause", {
+                method: 'POST'
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    console.log("error");
+                }
+                return response.json();
+            })
+            .then((job) => {
+                alert("Job Paused. It will not run again until resumed.");
+                // Reload the existing automation list
+                window.dispatchEvent(new CustomEvent("fetchsupplier"));
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+        },
+
+        resume_automation(automation_id) {
+            if (!confirm("Really resume the schedule for job with ID: " + automation_id + "?")) {
+                return;
+            }
+            fetch("/scheduler/jobs/" + automation_id + "/resume", {
+                method: 'POST'
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    console.log("error");
+                }
+                return response.json();
+            })
+            .then((job) => {
+                alert("Job Resumed. It will run on it's schedule until paused or deleted.");
+                // Reload the existing automation list
+                window.dispatchEvent(new CustomEvent("fetchsupplier"));
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+        },
+
         schedule_automation(event, automation_id) {
             event.preventDefault();
-            console.debug(this.schedule);
-            console.debug(this.customtime);
             if (!this.schedule || (this.schedule == 'custom' && !this.customtime)) {
                 this.error = 'Invalid entry.';
                 return;
