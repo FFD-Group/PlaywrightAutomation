@@ -2,11 +2,13 @@ import re
 import mimetypes
 from flask import json
 from app import scheduler
+from automations import set_automation_last_run_result
 from database import query_db
 import requests
 
 def download_file(automation_id: str) -> None:
     with scheduler.app.app_context():
+        result = "Success, the download ran successfully"
         automation = query_db("SELECT * FROM automations WHERE id = ?", (automation_id,))
         automation = [dict(row) for row in automation][0]
         download_url = automation["url"]
@@ -23,5 +25,7 @@ def download_file(automation_id: str) -> None:
 
         except Exception as e:
             print(e)
+            result = "Failure, an error occurred during the download"
+        set_automation_last_run_result(automation_id, result)
 
 
