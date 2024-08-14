@@ -34,6 +34,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         deleteAction(el) {
+            window.dispatchEvent(new CustomEvent('removeaction', {
+                detail: {
+                    action: el.parentNode
+                }
+            }));
             let target = document.getElementById("target");
             target.removeChild(el.parentNode);
         },
@@ -81,9 +86,9 @@ document.addEventListener('alpine:init', () => {
             ev.preventDefault();
             let dropTarget = document.getElementById("target");
             let newAction = Alpine.store("dragged").cloneNode(true);
-            // add a delete button which deletes the action from the list...
             let deleteButton = document.createElement("button");
             deleteButton.setAttribute('x-on:click.prevent', 'deleteAction($el)');
+            deleteButton.setAttribute('class', 'font-bold text-xl ml-auto');
             deleteButton.appendChild(document.createTextNode("X"));
             newAction.appendChild(deleteButton);
             newAction.classList.remove("dragging");
@@ -95,6 +100,13 @@ document.addEventListener('alpine:init', () => {
             newAction.removeChild(grabhandle);
             newAction.removeAttribute("draggable");
             console.debug(this.action_list);
+        },
+
+        popAction(action_element) {
+            let action_index = this.action_list.indexOf(action_element);
+            if (action_index > -1) {
+                this.action_list.splice(action_index, 1);
+            }
         },
 
         clearList() {
