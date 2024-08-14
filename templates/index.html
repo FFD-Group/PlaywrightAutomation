@@ -102,7 +102,7 @@
                                 <label for="time" x-show="schedule == 'custom'">Time:
                                     <input type="time" name="time" x-model="customtime" :required="(schedule == 'custom')" />
                                 </label>
-                                <button @click="schedule_automation($event, automation.id)" class="py-1 bg-blue-600" type="button">Schedule</button>
+                                <button @click="schedule_automation($event, automation.id, automation.type)" class="py-1 bg-blue-600" type="button">Schedule</button>
                             </form>
                             <p x-show="error" class="text-xs text-red-700 text-center italic font-bold" x-text="error"></p>
                         </div>

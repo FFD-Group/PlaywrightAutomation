@@ -92,12 +92,13 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
 @app.route("/schedule/<string:automation_id>", methods=['POST'])
 def schedule_automation(automation_id: str):
     data = request.get_json()
+    print(data)
     schedule = data["schedule"]
     cron = CRON_SCHEDULES[schedule]
     if schedule == "custom":
         cron["hour"],cron["minute"] = data["time"].split(":")
     set_automation_schedule(automation_id, schedule)
-    add_automation_schedule(scheduler, automation_id, cron)
+    add_automation_schedule(scheduler, automation_id, cron, data["type"])
     next_run = get_automation_next_run_time(scheduler, automation_id)
     return json.dumps(next_run)
 

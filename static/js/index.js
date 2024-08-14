@@ -214,7 +214,7 @@ document.addEventListener('alpine:init', () => {
             })
         },
 
-        schedule_automation(event, automation_id) {
+        schedule_automation(event, automation_id, automation_type) {
             event.preventDefault();
             if (!this.schedule || (this.schedule == 'custom' && !this.customtime)) {
                 this.error = 'Invalid entry.';
@@ -229,7 +229,8 @@ document.addEventListener('alpine:init', () => {
             // fetch to endpoint to set automation schedule
             data = {
                 schedule: this.schedule,
-                time: this.customtime
+                time: this.customtime,
+                type: automation_type
             };
 
             fetch("/schedule/" + automation_id, {
