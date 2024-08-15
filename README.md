@@ -6,14 +6,12 @@ Tailwind is used for CSS and compiles `/static/css/` to `/static/css/styles.css`
 Flask runs the web server.
 
 ### setup
-Create a virtual env and install playwright
+Create a virtual env and install dependencies
 
 ```python
 python -m venv venv # create virtual environment
 .\venv\Scripts\activate # OR: 'source venv/Scripts/active' if on Unix
-pip install pytest-playwright # require playwright
-playwright install # let playwright install its dependencies
-pytest # run pytest which will run test_* files to make sure all works
+pip install -r requirements.txt # install dependencies
 ```
 
 ### tailwind build
@@ -28,6 +26,13 @@ can be run using;
 ```python
 from app import init_db
 init_db()
+```
+
+#### Sample data
+Sample data can be added from `sample_data.sql` using;
+```python
+from app import add_sample_data
+add_sample_data()
 ```
 
 ### run server
