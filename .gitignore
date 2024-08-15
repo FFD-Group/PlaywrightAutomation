@@ -32,11 +32,15 @@ assets_compiled
 
 # downloaded files & recordings
 downloads
-static/recordings/trace
+static/recordings/traces
 static/recordings/videos
 
 # generated css
 static/css/styles.css
+
+# databases
+jobs.sqlite
+suppliers.sqlite
 
 # Secrets
 .env
