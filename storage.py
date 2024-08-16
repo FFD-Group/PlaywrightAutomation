@@ -25,6 +25,9 @@ class WorkDrive:
     oauthlib_conn: OAuth2Session
 
     def __init__(self) -> None:
+        """Initialise the WorkDrive instance, primarily to setup the
+        OAuth2.0 credentials and make sure they are authorised."""
+
         load_dotenv()
         client_id = os.getenv("Z_CLIENT_ID")
         client_secret = os.getenv("Z_CLIENT_SECRET")
@@ -42,6 +45,11 @@ class WorkDrive:
             )
 
     def upload_file(self, location_id: str, file_path: str) -> bool:
+        """Uploads the file at the given filepath to the folder location indicated
+        by the location_id parameter. Uses mimetypes to auto-detect type. If a file
+        already exists with the same name, WorkDrive automatically appends a 
+        timestamp to the end."""
+
         file_type = mimetypes.guess_type(file_path)
         file_name = Path(file_path).name
         url = f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/upload"
@@ -58,6 +66,7 @@ class WorkDrive:
         """Fetches a list of tuples which represent subfolder names & IDs
         from the defined root folder and all subfolders one level deep
         from those."""
+
         locations = [(os.getenv("Z_ROOT_FOLDER_NAME"), os.getenv("Z_ROOT_FOLDER_ID"))]
         folders = self._list_folders(locations[0][1])
         for folder in folders:
@@ -71,6 +80,10 @@ class WorkDrive:
         return locations
     
     def _list_folders(self, id) -> List:
+        """Fetches a list of folders within the folder with the given
+        id parameter. Returns a list of tuples with the folder name &
+        IDs."""
+
         fields = "id,type,name"
         r = self.oauthlib_conn.get(f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/files/{id}/files?filter%5Btype%5D=folder&fields%5Bfiles%5D=" + fields)
         if (r.status_code != 200):
@@ -79,8 +92,12 @@ class WorkDrive:
 
 if __name__ == "__main__":
 
+    print("Testing WorkDrive authorization and settings")
     test_wd = WorkDrive()
-    test_wd.upload_file(os.getenv("Z_ROOT_FOLDER_ID"), "walkthrough/add-client.jpg")
+    print("Uploading a test file to the root folder")
+    r = test_wd.upload_file(os.getenv("Z_ROOT_FOLDER_ID"), "walkthrough/add-client.jpg")
+    print("File uploaded:", r)
+    print("Testing fetching folder structure from set root folder")
     folders = test_wd.get_locations()
     for folder in folders:
         print(folder)
