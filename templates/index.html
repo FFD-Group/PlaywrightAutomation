@@ -51,8 +51,11 @@
                 <label for="location">Save location
                     <select name="location" x-model="location" required>
                         <option selected="true">Select where to save the file(s)</option>
-                        <option value="83475173jwegbfby228ur8">Root WorkDrive Folder</option>
-                        <option value="iuhs87sb6sd7b9db797b98">WorkDrive Folder 2</option>
+                        {% for folder in save_locations %}
+                            <option value="{{folder[1]}}">
+                                {{folder[0]}}
+                            </option>
+                        {% endfor %}
                     </select>
                 </label>
             </fieldset>

@@ -21,13 +21,16 @@ from automation_builder import AutomationBuilder
 from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
 from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
+from storage import WorkDrive
 
 ## INDEX
 
 @app.route("/")
 def index():
     suppliers = get_suppliers()
-    return render_template("index.html", suppliers=suppliers)
+    wd = WorkDrive()
+    folders = wd.get_locations()
+    return render_template("index.html", suppliers=suppliers, save_locations=folders)
 
 ## DOWNLOADS
 
