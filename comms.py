@@ -38,8 +38,7 @@ class Cliq:
     def post_message(self, channel_id: str, message: dict) -> None:
         url = f"https://cliq.zoho.{os.getenv('Z_REGION')}/api/v2/channelsbyname/{channel_id}/message?bot_unique_name={os.getenv('Z_CLIQ_BOT_NAME')}"
         data = json.dumps(message)
-        response = self.oauthlib_conn.post(url, data=data)
-        print(response.status_code, response.content)
+        self.oauthlib_conn.post(url, data=data)
 
 
 if __name__ == "__main__":
@@ -57,7 +56,7 @@ if __name__ == "__main__":
             "action": {
                 "type": "open.url",
                 "data": {
-                    "web": "https://www.fridgefreezerdirect.co.uk"
+                    "web": "https://www.google.co.uk"
                 }
             }
         }]
