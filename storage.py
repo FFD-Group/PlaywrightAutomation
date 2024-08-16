@@ -5,6 +5,8 @@ from flask import json
 from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
+import mimetypes
+from pathlib import Path
 
 class StorageProtocol(Protocol):
     """StorageProtocol outlines methods for interacting with storage."""
@@ -39,8 +41,18 @@ class WorkDrive:
                 scope=scope
             )
 
-    def uploadFile(self, location_id: str, filepath: str) -> bool:
-        pass
+    def upload_file(self, location_id: str, file_path: str) -> bool:
+        file_type = mimetypes.guess_type(file_path)
+        file_name = Path(file_path).name
+        url = f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/upload"
+        payload = {'parent_id': location_id, 'override-name-exist': 'false'}
+        files = [
+            ('content',(file_name,open(file_path,'rb'),file_type))
+        ]
+        response = self.oauthlib_conn.post(url,data=payload, files=files)
+
+        return response.status_code == 200
+
 
     def get_locations(self) -> List:
         """Fetches a list of tuples which represent subfolder names & IDs
@@ -68,9 +80,7 @@ class WorkDrive:
 if __name__ == "__main__":
 
     test_wd = WorkDrive()
+    test_wd.upload_file(os.getenv("Z_ROOT_FOLDER_ID"), "walkthrough/add-client.jpg")
     folders = test_wd.get_locations()
     for folder in folders:
         print(folder)
-        if isinstance(folder[1], List):
-            for subfolder in folder[1]:
-                print("|->", subfolder)
