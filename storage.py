@@ -2,7 +2,6 @@ import os
 from typing import List, Protocol
 from dotenv import load_dotenv
 from flask import json
-from requests_oauthlib import OAuth2Session
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 import mimetypes
