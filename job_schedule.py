@@ -14,7 +14,7 @@ def add_automation_schedule(scheduler: APScheduler, automation_id: str, cron: di
     """Create a job for the automation with the given ID and
     schedule it to run on the given cron schedule."""
     replace = True if scheduler.get_job(automation_id) else False
-    if (automation_type == "0"):
+    if (automation_type == 0):
         automation_steps = get_automation_steps(automation_id)
         automation_steps = [dict(row) for row in automation_steps]
         scheduler.add_job(id=automation_id, func=run_automation_steps, replace_existing=replace, kwargs={"automation_id": automation_id, "steps": automation_steps}, trigger='cron', **cron)
