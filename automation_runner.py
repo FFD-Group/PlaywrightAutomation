@@ -20,6 +20,7 @@ def run_automation_steps(automation_id: str, steps: List) -> List[str]:
             except Exception as e:
                 print(e)
                 result = "Failure, an error occurred during the automation steps"
+                raise e
         set_automation_last_run_result(automation_id, result)
     return downloads
 

@@ -10,7 +10,6 @@ def job_callback(event) -> None:
         load_dotenv()
         cliq = Cliq()
         supplier_details = [dict(row) for row in get_automation_card_data(event.job_id)][0]
-        print(supplier_details)
         type_value = "Automation" if supplier_details["type"] == 0 else "Download"
         details_table = {
             "type": "table",
@@ -74,10 +73,7 @@ def job_callback(event) -> None:
 
         if event.exception:
             message = {
-                "text": f"""Oh no! Something went wrong gathering this file at {event.scheduled_run_time}.\n
-                        Here is the error\n\n
-                        ```\n{event.exception}\n```
-                        """,
+                "text": f"""Oh no! Something went wrong gathering this file at {event.scheduled_run_time}.\nHere is the error\n\n```\n{event.exception}\n```""",
                 "slides": details_table,
                 "card": {
                     "theme": "modern-inline"
