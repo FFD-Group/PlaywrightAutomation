@@ -43,7 +43,7 @@ class WorkDrive:
                 scope=scope
             )
 
-    def upload_file(self, location_id: str, file_path: str) -> bool:
+    def upload_file(self, location_id: str, file_path: str) -> str:
         """Uploads the file at the given filepath to the folder location indicated
         by the location_id parameter. Uses mimetypes to auto-detect type. If a file
         already exists with the same name, WorkDrive automatically appends a 
@@ -53,12 +53,19 @@ class WorkDrive:
         file_name = Path(file_path).name
         url = f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/upload"
         payload = {'parent_id': location_id, 'override-name-exist': 'false'}
+        print("upload params:")
+        print(url, file_type, file_name, file_path, payload, sep=" - ")
         files = [
             ('content',(file_name,open(file_path,'rb'),file_type))
         ]
         response = self.oauthlib_conn.post(url,data=payload, files=files)
 
-        return response.status_code == 200
+        if response.status_code != 200:
+            print(response.status_code, response.content)
+            return
+
+        print(response.json())
+        return response.json()["data"][0]["attributes"]["Permalink"]
 
 
     def get_locations(self) -> List:

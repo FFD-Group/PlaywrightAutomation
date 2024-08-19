@@ -27,3 +27,8 @@ def set_automation_schedule(automation_id: str, schedule: str) -> None:
 
 def set_automation_last_run_result(automation_id: str, result: str) -> None:
     insert_to_db("UPDATE automations SET (last_run_result) = (:last_run_result) WHERE id = (:id)", {"last_run_result":result, "id":automation_id})
+
+def get_job_location(automation_id: str) -> str|None:
+    return query_db(
+        "SELECT location FROM automations WHERE id = ?", (automation_id,)
+    )

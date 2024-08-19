@@ -1,6 +1,7 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from flask import Flask, g, json, render_template, request
 from flask_apscheduler import APScheduler
+from apscheduler import events
 from datetime import datetime
 
 class Config:
@@ -22,6 +23,9 @@ from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
 from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 from storage import WorkDrive
+from job_callback import job_callback
+
+scheduler.add_listener(job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED)
 
 ## INDEX
 
