@@ -32,3 +32,9 @@ def get_job_location(automation_id: str) -> str|None:
     return query_db(
         "SELECT location FROM automations WHERE id = ?", (automation_id,)
     )
+
+def get_automation_card_data(automation_id: str) -> str|None:
+    return query_db(
+        "SELECT s.name as supplier_name, a.type, a.name as automation_name FROM automations a JOIN suppliers s ON a.supplier_id = s.id WHERE a.id = ?",
+        (automation_id,)
+    )

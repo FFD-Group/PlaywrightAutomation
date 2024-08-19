@@ -1,6 +1,6 @@
 from comms import Cliq
 from storage import WorkDrive
-from automations import get_job_location
+from automations import get_job_location, get_automation_card_data
 import os
 from dotenv import load_dotenv
 from app import scheduler
@@ -9,15 +9,39 @@ def job_callback(event) -> None:
     with scheduler.app.app_context():
         load_dotenv()
         cliq = Cliq()
+        supplier_details = [dict(row) for row in get_automation_card_data(event.job_id)][0]
+        print(supplier_details)
+        type_value = "Automation" if supplier_details["type"] == 0 else "Download"
+        details_table = {
+            "type": "table",
+            "title": "Details",
+            "data": {
+                "headers": [
+                "Type",
+                type_value
+                ],
+                "rows": [
+                    {
+                        "Type": "Supplier",
+                        type_value: supplier_details["supplier_name"]
+                    },
+                    {
+                        "Type": "Name",
+                        type_value: supplier_details["automation_name"]
+                    }
+                ]
+            }
+        },
         message = None
-        if event.retval:
+        if event.retval and not event.exception:
             zwd = WorkDrive()
             job_location = get_job_location(event.job_id)[0][0]
             message = {
-                "text": "I have gathered this file as asked, it is ready to view.",
+                "text": f"I have gathered this  file as asked, it is ready to view.",
                 "card": {
                     "theme": "modern-inline"
                 },
+                "slides": details_table,
                 "buttons": []
             }
             if event.retval and len(event.retval) > 1:
@@ -52,13 +76,14 @@ def job_callback(event) -> None:
             message = {
                 "text": f"""Oh no! Something went wrong gathering this file at {event.scheduled_run_time}.\n
                         Here is the error\n\n
-                        {event.exception}
+                        ```\n{event.exception}\n```
                         """,
+                "slides": details_table,
                 "card": {
                     "theme": "modern-inline"
                 },
             }
         
         if message:
-            # cliq.post_message(os.getenv("Z_CLIQ_CHANNEL_NAME"), message=message)
-            print(message)
+            cliq.post_message(os.getenv("Z_CLIQ_CHANNEL_NAME"), message=message)
+            # print(message)
