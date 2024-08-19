@@ -61,7 +61,8 @@ class WorkDrive:
         if response.status_code != 200:
             print(response.status_code, response.content)
             return
-
+        
+        os.remove(file_path)
         return response.json()["data"][0]["attributes"]["Permalink"]
 
 
