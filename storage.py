@@ -53,8 +53,6 @@ class WorkDrive:
         file_name = Path(file_path).name
         url = f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/upload"
         payload = {'parent_id': location_id, 'override-name-exist': 'false'}
-        print("upload params:")
-        print(url, file_type, file_name, file_path, payload, sep=" - ")
         files = [
             ('content',(file_name,open(file_path,'rb'),file_type))
         ]
@@ -64,7 +62,6 @@ class WorkDrive:
             print(response.status_code, response.content)
             return
 
-        print(response.json())
         return response.json()["data"][0]["attributes"]["Permalink"]
 
 
