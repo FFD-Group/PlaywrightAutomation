@@ -9,6 +9,7 @@ class Config:
         'default': SQLAlchemyJobStore(url="sqlite:///jobs.sqlite")
     }
     SCHEDULER_API_ENABLED = True
+    SCHEDULER_TIMEZONE = "Europe/London"
 
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())
