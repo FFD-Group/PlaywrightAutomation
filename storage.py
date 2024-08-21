@@ -6,6 +6,7 @@ from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 import mimetypes
 from pathlib import Path
+import time
 
 class StorageProtocol(Protocol):
     """StorageProtocol outlines methods for interacting with storage."""
@@ -53,23 +54,21 @@ class WorkDrive:
         file_name = Path(file_path).name
         url = f"https://www.zohoapis.{os.getenv('Z_REGION')}/workdrive/api/v1/upload"
         payload = {'parent_id': location_id, 'override-name-exist': 'false'}
-        files = [
-            ('content',(file_name,open(file_path,'rb'),file_type))
-        ]
+        try:
+            with open(file_path, 'rb') as file:
+                files = [
+                    ('content',(file_name,file.read(),file_type))
+                ]
+        except OSError as e:
+            print(e)
         response = self.oauthlib_conn.post(url,data=payload, files=files)
 
         if response.status_code != 200:
             print(response.status_code, response.content)
             return
         
-        deleted = False
-        while not deleted:
-            try:
-                os.remove(file_path)
-                deleted = True
-            except Exception as e:
-                print(e)
-                continue
+        os.remove(file_path)
+
         return response.json()["data"][0]["attributes"]["Permalink"]
 
 
