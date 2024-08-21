@@ -3,6 +3,7 @@ from flask import Flask, g, json, render_template, request, has_request_context
 from flask_apscheduler import APScheduler
 from apscheduler import events
 from datetime import datetime
+from logging.config import dictConfig
 import requests
 import os
 
@@ -12,6 +13,13 @@ class Config:
     }
     SCHEDULER_API_ENABLED = True
     SCHEDULER_TIMEZONE = "Europe/London"
+
+dictConfig({
+    'version': 1,
+    'root': {
+        'level': os.getenv("LOGGING_LEVEL")
+    }
+})
 
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())
