@@ -44,7 +44,7 @@ class WorkDrive:
                 scope=scope
             )
 
-    def upload_file(self, location_id: str, file_path: str) -> str:
+    def upload_file(self, location_id: str, file_path: str, delete_local: bool = True) -> str:
         """Uploads the file at the given filepath to the folder location indicated
         by the location_id parameter. Uses mimetypes to auto-detect type. If a file
         already exists with the same name, WorkDrive automatically appends a 
@@ -67,7 +67,8 @@ class WorkDrive:
             print(response.status_code, response.content)
             return
         
-        os.remove(file_path)
+        if delete_local:
+            os.remove(file_path)
 
         return response.json()["data"][0]["attributes"]["Permalink"]
 
