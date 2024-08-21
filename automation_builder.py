@@ -4,6 +4,7 @@ import playwright_automation
 from pathlib import Path
 
 import time
+import os
 ## Receives a supplier ID and a list of actions from the HTML UI
 ## Needs to compile the automation, run it and return;
 ## a) downloaded file links
@@ -54,11 +55,12 @@ class AutomationBuilder:
             "steps": automation,
             "downloads": []
         }
+        headless = False if os.getenv("DEBUG") == 1 else True
         try:
             # run the automation steps and return trace and downloads
             with sync_playwright() as pw:
                 chromium = pw.chromium
-                browser = chromium.launch(headless=False)
+                browser = chromium.launch(headless=headless)
                 context = browser.new_context(record_video_dir="static/recordings/videos/")
                 context.tracing.start(screenshots=True, snapshots=True, sources=True)
                 page = context.new_page()

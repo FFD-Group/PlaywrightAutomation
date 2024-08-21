@@ -6,6 +6,7 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 from automations import set_automation_last_run_result
 from flask import json
+import os
 
 def run_automation_steps(automation_id: str, steps: List) -> List[str]:
     downloads = []
@@ -33,9 +34,10 @@ def run_automation_steps(automation_id: str, steps: List) -> List[str]:
 def perform_actions(actions: List, automation_id: str) -> List|None:
     run_time = datetime.now()
     downloads = []
+    headless = False if os.getenv("DEBUG") == 1 else True
     with sync_playwright() as pw:
         chromium = pw.chromium
-        browser = chromium.launch(headless=False)
+        browser = chromium.launch(headless=headless)
         context = browser.new_context(record_video_dir="static/recordings/videos/")
         context.tracing.start(screenshots=True, snapshots=True, sources=True)
         page = context.new_page()
