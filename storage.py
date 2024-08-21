@@ -62,7 +62,14 @@ class WorkDrive:
             print(response.status_code, response.content)
             return
         
-        os.remove(file_path)
+        deleted = False
+        while not deleted:
+            try:
+                os.remove(file_path)
+                deleted = True
+            except Exception as e:
+                print(e)
+                continue
         return response.json()["data"][0]["attributes"]["Permalink"]
 
 
