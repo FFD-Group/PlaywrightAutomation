@@ -9,6 +9,7 @@ import requests
 
 def download_file(automation_id: str) -> List[str]:
     with scheduler.app.app_context():
+        scheduler.app.logger.info("Running the download with ID:" + automation_id)
         result = "Success, the download ran successfully"
         automation = query_db("SELECT * FROM automations WHERE id = ?", (automation_id,))
         automation = [dict(row) for row in automation][0]
@@ -30,8 +31,11 @@ def download_file(automation_id: str) -> List[str]:
         except Exception as e:
             print(e)
             result = "Failure, an error occurred during the download"
+            scheduler.app.logger.error("Error occurred while running the download.", exc_info=True)
+            raise e
         set_automation_last_run_result(automation_id, result)
         if download_file:
+            scheduler.app.logger.info("Downloaded file:" + download_file)
             return [download_file]
 
 

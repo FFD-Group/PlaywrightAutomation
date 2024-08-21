@@ -9,7 +9,9 @@ def job_callback(event) -> None:
     with scheduler.app.app_context():
         load_dotenv()
         cliq = Cliq()
-        supplier_details = [dict(row) for row in get_automation_card_data(event.job_id)][0]
+        supplier_details = [dict(row) for row in get_automation_card_data(event.job_id)]
+        if len(supplier_details) > 0:
+            supplier_details = supplier_details[0]
         type_value = "Automation" if supplier_details["type"] == 0 else "Download"
         details_table = {
             "type": "table",
@@ -45,7 +47,9 @@ def job_callback(event) -> None:
             }
             if event.retval and len(event.retval) > 1:
                 for download in event.retval:
+                    scheduler.app.logger.info("Uploading file to WorkDrive.", args=download)
                     permalink = zwd.upload_file(job_location, download)
+                    scheduler.app.logger.debug("Permalink for file:" + permalink)
                     message["buttons"].append({
                         "label": "View file",
                         "type": "+",
@@ -57,7 +61,9 @@ def job_callback(event) -> None:
                         }
                     })
             elif event.retval and len(event.retval) == 1:
+                scheduler.app.logger.info("Uploading file to WorkDrive: " + str(event.retval[0]))
                 permalink = zwd.upload_file(job_location, event.retval[0])
+                scheduler.app.logger.debug("Permalink for file:" + permalink)
                 message["buttons"].append({
                         "label": "View file",
                         "type": "+",
@@ -68,8 +74,8 @@ def job_callback(event) -> None:
                             }
                         }
                     })
-                
-            ### Find a way to add identifying info to card too.
+            
+            scheduler.app.logger.info("Posting successful result to cliq.")
 
         if event.exception:
             message = {
@@ -79,6 +85,7 @@ def job_callback(event) -> None:
                     "theme": "modern-inline"
                 },
             }
+            scheduler.app.logger.info("Posting failed result to cliq.")
         
         if message:
             cliq.post_message(os.getenv("Z_CLIQ_CHANNEL_NAME"), message=message)

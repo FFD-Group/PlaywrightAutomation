@@ -1,8 +1,10 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from flask import Flask, g, json, render_template, request
+from flask import Flask, g, json, render_template, request, has_request_context
 from flask_apscheduler import APScheduler
 from apscheduler import events
 from datetime import datetime
+import requests
+import os
 
 class Config:
     SCHEDULER_JOBSTORES = {
@@ -13,6 +15,8 @@ class Config:
 
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())
+
+app.logger.info("Creating Advanced Python Scheduler object and initialising.")
 
 scheduler = APScheduler()
 scheduler.init_app(app)
@@ -25,6 +29,13 @@ from suppliers import get_suppliers, create_supplier, get_supplier_automations
 from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 from storage import WorkDrive
 from job_callback import job_callback
+
+
+app.logger.info("Scheduling heartbeat and adding scheduler event callback.")
+def betterstack_heartbeat():
+    requests.get(os.getenv("HEARTBEAT_URL"))
+
+scheduler.add_job(id='heartbeat', func=betterstack_heartbeat, trigger='cron', hour='*/1', replace_existing=True)
 
 scheduler.add_listener(job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED)
 
@@ -42,12 +53,14 @@ def index():
 @app.route("/automations/download/save", methods=['POST'])
 def save_download():
     data = request.get_json()
+    app.logger.debug("New download saving with data:" + str(data))
     try:
         create_supplier(data["supplier_name"], data["supplier_id"])
         inserted_id = create_automation(1, data["download_url"], data["save_location"], data["automation_name"], data["supplier_id"])
         return json.dumps(inserted_id)
     except Exception as e:
         print(e)
+        app.logger.error("Something went wrong saving the download.", exc_info=True)
 
 ## AUTOMATIONS
 
@@ -60,6 +73,7 @@ def automation_builder(supplier_id: int):
 @app.route("/automations/<int:supplier_id>/save", methods=['POST'])
 def save_automation(supplier_id: int):
     data = request.get_json()
+    app.logger.debug("Saving new automation with passed data:" + str(data))
     supplier_name = request.args.get('supplier_name')
     try:
         create_supplier(supplier_name, supplier_id)
@@ -68,10 +82,12 @@ def save_automation(supplier_id: int):
         return json.dumps(f"/?automation_id={automation_id}&supplier_id={supplier_id}&supplier_name={supplier_name}")
     except Exception as e:
         print(e)
+        app.logger.error("Something went wrong saving the automation.", exc_info=True)
 
 @app.route("/test-automation/<int:supplier_id>", methods=['POST'])
 def test_automation(supplier_id: int):
     data = request.get_json()
+    app.logger.debug("Testing automation with passed data:" + str(data))
     builder = AutomationBuilder(supplier_id, data)
     automation = builder.build_automation()
     test_results = builder.test_automation(automation)
@@ -89,6 +105,8 @@ def get_automations(supplier_id: int):
 
 @app.route("/automation/<int:supplier_id>/<int:automation_id>/delete", methods=['DELETE'])
 def delete_supplier_automation(supplier_id: int, automation_id: int):
+    logdata = (supplier_id, automation_id, (request.remote_addr if has_request_context() else None))
+    app.logger.info("Deleting automation: " + str(logdata))
     deleted_automations = delete_automation(automation_id, supplier_id)
     result = {}
     if deleted_automations:
@@ -100,7 +118,7 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
 @app.route("/schedule/<string:automation_id>", methods=['POST'])
 def schedule_automation(automation_id: str):
     data = request.get_json()
-    print(data)
+    app.logger.info(f"Scheduling automation with ID: {automation_id} for: " + str(data))
     schedule = data["schedule"]
     cron = CRON_SCHEDULES[schedule]
     if schedule == "custom":
@@ -120,6 +138,7 @@ def close_connection(exception) -> None:
 
 def init_db():
     with app.app_context():
+        app.logger.debug("Initialising database.")
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
@@ -127,6 +146,7 @@ def init_db():
 
 def add_sample_data():
     with app.app_context():
+        app.logger.debug("Installing sample data.")
         db = get_db()
         with app.open_resource('sample_data.sql', mode='r') as f:
             db.cursor().executescript(f.read())

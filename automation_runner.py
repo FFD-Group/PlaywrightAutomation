@@ -10,16 +10,22 @@ from flask import json
 def run_automation_steps(automation_id: str, steps: List) -> List[str]:
     downloads = []
     with scheduler.app.app_context():
+        scheduler.app.logger.info("Running automation with ID:" + automation_id)
+        scheduler.app.logger.debug("Automation steps:" + str(steps))
         result = "Success, the automations steps ran successfully"
         if not steps:
             result = "Failure, could not load automation steps"
+            scheduler.app.logger.warn("Automation steps not found.")
         else:
             actions = json.loads(steps[0]['automation_steps'])
             try:
                 downloads = perform_actions(actions, automation_id)
+                if downloads:
+                    scheduler.app.logger.info(f"Downloaded {len(downloads)} files: " + str(downloads))
             except Exception as e:
                 print(e)
                 result = "Failure, an error occurred during the automation steps"
+                scheduler.app.logger.error("Error running the automation steps.", exc_info=True)
                 raise e
         set_automation_last_run_result(automation_id, result)
     return downloads
@@ -38,6 +44,7 @@ def perform_actions(actions: List, automation_id: str) -> List|None:
         page.goto(start_url)
 
         for action in actions[1:]:
+            scheduler.app.logger.debug("Performing action:" + str(action))
             # call the action => func_name, page => page, **args
             func = action['action'] # func name
             args = { # construct args

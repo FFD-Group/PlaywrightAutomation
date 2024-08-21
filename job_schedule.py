@@ -2,6 +2,7 @@ from flask_apscheduler import APScheduler
 from automations import get_automation_steps
 from automation_runner import run_automation_steps
 from downloader import download_file
+from flask import request, has_request_context
 
 CRON_SCHEDULES = {
     "hourly": {"hour": "*/1"},
@@ -24,14 +25,20 @@ def add_automation_schedule(scheduler: APScheduler, automation_id: str, cron: di
 def remove_automation_schedule(scheduler: APScheduler, automation_id: str) -> None:
     """Remove any jobs which have an ID the same as the given
     automation ID."""
+    logdata = (automation_id, (request.remote_addr if has_request_context() else None))
+    scheduler.app.logger.info("Removing schedule for automation: " + str(logdata))
     scheduler.remove_job(automation_id)
 
 def pause_automation_schedule(scheduler: APScheduler, automation_id: str) -> None:
     """Pause the scheduled job with the given ID."""
+    logdata = (automation_id, (request.remote_addr if has_request_context() else None))
+    scheduler.app.logger.info("Pausing schedule for automation: " + str(logdata))
     scheduler.pause_job(automation_id)
 
 def resume_automation_schedule(scheduler: APScheduler, automation_id: str) -> None:
     """Resume the scheduled job with the given ID."""
+    logdata = (automation_id, (request.remote_addr if has_request_context() else None))
+    scheduler.app.logger.info("Resuming schedule for automation: " + str(logdata))
     scheduler.resume_job(automation_id)
 
 def get_automation_next_run_time(scheduler: APScheduler, automation_id: str) -> str|None:
