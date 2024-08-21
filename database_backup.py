@@ -13,4 +13,4 @@ def backup_database():
         scheduler.app.logger.info("Backing up main DB to WorkDrive.")
         zwd.upload_file(os.getenv("Z_DATABASE_BACKUP_LOCATION_ID"), "suppliers.sqlite")
         scheduler.app.logger.info("Sending heartbeat request to Betterstack.")
-        requests.get("https://uptime.betterstack.com/api/v1/heartbeat/gJ7SNtE9UVP3PjPj7YsSug6x")
+        requests.get(os.getenv("BACKUP_HEARTBEAT_URL"))
