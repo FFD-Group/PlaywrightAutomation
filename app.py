@@ -37,14 +37,15 @@ from suppliers import get_suppliers, create_supplier, get_supplier_automations
 from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
 from storage import WorkDrive
 from job_callback import job_callback
+from database_backup import backup_database
 
 
-app.logger.info("Scheduling heartbeat and adding scheduler event callback.")
+app.logger.info("Scheduling heartbeat, backups and adding scheduler event callback.")
 def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 scheduler.add_job(id='heartbeat', func=betterstack_heartbeat, trigger='cron', hour='*/1', replace_existing=True)
-
+scheduler.add_job(id="database-backup", func=backup_database, trigger='cron', day='*/1', hour='3', replace_existing=True)
 scheduler.add_listener(job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED)
 
 ## INDEX
