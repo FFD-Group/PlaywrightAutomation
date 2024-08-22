@@ -34,7 +34,7 @@ from automations import create_automation, delete_automation, save_automation_st
 from automation_builder import AutomationBuilder
 from database import get_db
 from suppliers import get_suppliers, create_supplier, get_supplier_automations
-from job_schedule import add_automation_schedule, get_automation_next_run_time, CRON_SCHEDULES
+from job_schedule import add_automation_schedule, get_automation_next_run_time, remove_automation_schedule, CRON_SCHEDULES
 from storage import WorkDrive
 from job_callback import job_callback
 from database_backup import backup_database
@@ -116,10 +116,13 @@ def get_automations(supplier_id: int):
 def delete_supplier_automation(supplier_id: int, automation_id: int):
     logdata = (supplier_id, automation_id, (request.remote_addr if has_request_context() else None))
     app.logger.info("Deleting automation: " + str(logdata))
+    deleted_schedules = delete_supplier_automation(supplier_id, automation_id)
     deleted_automations = delete_automation(automation_id, supplier_id)
     result = {}
     if deleted_automations:
-        result = [dict(row) for row in deleted_automations]
+        result["automations"] = [dict(row) for row in deleted_automations]
+    if deleted_schedules:
+        result["schedules"] = [dict(row) for row in deleted_schedules]
     return result
 
 ## SCHEDULES
