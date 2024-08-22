@@ -256,7 +256,7 @@
                             <div class="rounded-xl bg-sky-900 text-white text-center px-4 py-2">
                                 <a :href="data.trace" target="_blank">Download trace</a>
                             </div>
-                            <p>Download the trace, go to <a href="https://trace.playwright.dev/">trace.playwright.dev</a> and upload the trace file to see steps taken and useful debug information.</p>
+                            <p>Download the trace, go to <a href="https://trace.playwright.dev/" target="_blank">trace.playwright.dev</a> and upload the trace file to see steps taken and useful debug information.</p>
                         </section>
                     </div>
                     <section id="report_downloads">
@@ -268,7 +268,7 @@
                         </template>
                     </section>
                     <section>
-                        <button type="button" @click.prevent="saveAutomation()">Save Automation</button>
+                        <button class="bg-lime-600 w-full rounded text-white p-4 font-bold text-xl m-2" type="button" @click.prevent="saveAutomation()">Save Automation</button>
                     </section>
                 </div>
             </div>
