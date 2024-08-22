@@ -238,6 +238,7 @@ document.addEventListener('alpine:init', () => {
             })
             .catch((error) => {
                 console.error(error);
+                window.dispatchEvent(new CustomEvent("displayerror", {detail: error}))
             });
         }
     }));
@@ -250,6 +251,11 @@ document.addEventListener('alpine:init', () => {
             this.data = event.detail;
             this.show_report = true;
             document.getElementById("video_element").load();
+        },
+
+        displayError(event) {
+            this.data.error = event.detail;
+            this.show_report = true;
         },
 
         saveAutomation() {
