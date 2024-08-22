@@ -12,6 +12,12 @@ def job_callback(event) -> None:
         supplier_details = [dict(row) for row in get_automation_card_data(event.job_id)]
         if len(supplier_details) > 0:
             supplier_details = supplier_details[0]
+        if not supplier_details:
+            supplier_details = {
+                "supplier_name": "Unknown",
+                "type": 1,
+                "automation_name": "Unknown"
+            }
         type_value = "Automation" if supplier_details["type"] == 0 else "Download"
         details_table = {
             "type": "table",

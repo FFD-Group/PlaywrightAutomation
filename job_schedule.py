@@ -1,7 +1,7 @@
 from flask_apscheduler import APScheduler
 from automations import get_automation_steps
-from automation_runner import run_automation_steps
-from downloader import download_file
+import automation_runner
+import downloader
 from flask import request, has_request_context
 
 CRON_SCHEDULES = {
@@ -18,9 +18,9 @@ def add_automation_schedule(scheduler: APScheduler, automation_id: str, cron: di
     if (automation_type == 0):
         automation_steps = get_automation_steps(automation_id)
         automation_steps = [dict(row) for row in automation_steps]
-        scheduler.add_job(id=automation_id, func=run_automation_steps, replace_existing=replace, kwargs={"automation_id": automation_id, "steps": automation_steps}, trigger='cron', **cron)
+        scheduler.add_job(id=automation_id, func=getattr(automation_runner, "run_automation_steps"), replace_existing=replace, kwargs={"automation_id": automation_id, "steps": automation_steps}, trigger='cron', **cron)
     else:
-        scheduler.add_job(id=automation_id, func=download_file, replace_existing=replace, kwargs={"automation_id": automation_id}, trigger='cron', **cron)
+        scheduler.add_job(id=automation_id, func=getattr(downloader, "download_file"), replace_existing=replace, kwargs={"automation_id": automation_id}, trigger='cron', **cron)
 
 def remove_automation_schedule(scheduler: APScheduler, automation_id: str) -> None:
     """Remove any jobs which have an ID the same as the given
