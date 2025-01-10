@@ -97,7 +97,7 @@ def job_callback(event) -> None:
             ready_for_processing(
                 zwd.get_last_file_id(),
                 "Automation",
-                datetime.strftime(datetime.now(), "yyyy-mm-dd hh:mm:ss"),
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 get_supplier_id(supplier_details["supplier_name"]),
             )
 
