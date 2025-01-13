@@ -9,6 +9,17 @@ CREATE TABLE suppliers (
     name VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE uploads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    supplier_id UNSIGNED INTEGER,
+    filename VARCHAR(255) NOT NULL,
+    uploaded_at FLOAT NOT NULL,
+    processed UNSIGNED INTEGER NOT NULL,
+    FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+);
+
 CREATE TABLE automations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     type UNSIGNED INTEGER NOT NULL,
