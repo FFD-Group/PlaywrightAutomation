@@ -1,11 +1,26 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from flask import Flask, g, json, render_template, request, has_request_context
+from flask import (
+    Flask,
+    g,
+    json,
+    render_template,
+    request,
+    has_request_context,
+    flash,
+    redirect,
+    url_for,
+)
 from flask_apscheduler import APScheduler
 from apscheduler import events
 from datetime import datetime
 from logging.config import dictConfig
 import requests
 import os
+import time
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = "static/uploads"
+ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls"}
 
 
 class Config:
@@ -20,6 +35,9 @@ dictConfig({"version": 1, "root": {"level": os.getenv("LOGGING_LEVEL")}})
 
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+app.secret_key = b"tghJUV813_d/emp1"
 
 app.logger.info("Creating Advanced Python Scheduler object and initialising.")
 
@@ -35,7 +53,13 @@ from automations import (
 )
 from automation_builder import AutomationBuilder
 from database import get_db
-from suppliers import get_suppliers, create_supplier, get_supplier_automations
+from suppliers import (
+    get_suppliers,
+    create_supplier,
+    get_supplier_automations,
+    get_supplier_uploads,
+    add_uploaded_file,
+)
 from job_schedule import (
     add_automation_schedule,
     get_automation_next_run_time,
@@ -56,30 +80,71 @@ def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 
-scheduler.add_job(
-    id="heartbeat",
-    func=betterstack_heartbeat,
-    trigger="cron",
-    hour="*/1",
-    replace_existing=True,
-)
-scheduler.add_job(
-    id="database-backup",
-    func=backup_database,
-    trigger="cron",
-    day="*/1",
-    hour="3",
-    replace_existing=True,
-)
+# scheduler.add_job(
+#     id="heartbeat",
+#     func=betterstack_heartbeat,
+#     trigger="cron",
+#     hour="*/1",
+#     replace_existing=True,
+# )
+# scheduler.add_job(
+#     id="database-backup",
+#     func=backup_database,
+#     trigger="cron",
+#     day="*/1",
+#     hour="3",
+#     replace_existing=True,
+# )
 scheduler.add_listener(
     job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
 )
 
+
 ## INDEX
+def allowed_file(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
+    if request.method == "POST":
+        # check if the post request has the file part
+        if "file" not in request.files:
+            flash("No file part", "error")
+            return redirect(request.url)
+        file = request.files["file"]
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == "":
+            flash("No selected file", "error")
+            return redirect(request.url)
+        if "supplier_id" not in request.form:
+            flash("No supplier ID", "error")
+            return redirect(request.url)
+        if "supplier_name" not in request.form:
+            return redirect(request.url)
+        if not request.form["supplier_id"]:
+            flash("No supplier selected", "error")
+            return redirect(request.url)
+        supplier_id = request.form["supplier_id"]
+        if not request.form["supplier_name"]:
+            flash("No supplier name", "error")
+            return redirect(request.url)
+        supplier_name = request.form["supplier_name"]
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            create_supplier(supplier_name, supplier_id)
+            uploaded_at = time.time()
+            add_uploaded_file(supplier_id, filename, uploaded_at, 0)
+            flash("File uploaded for processing", "success")
+            return redirect(url_for("index", supplier_id=supplier_id))
+        else:
+            flash("Invalid file format", "error")
+            redirect(request.url)
     suppliers = get_suppliers()
     wd = WorkDrive()
     folders = wd.get_locations()
@@ -110,6 +175,16 @@ def save_download():
         app.logger.error(
             "Something went wrong saving the download.", exc_info=True
         )
+
+
+## UPLOADS
+
+
+@app.route("/uploads/<int:supplier_id>")
+def get_uploads(supplier_id: int):
+    uploads = get_supplier_uploads(supplier_id)
+    result = [dict(row) for row in uploads]
+    return result
 
 
 ## AUTOMATIONS

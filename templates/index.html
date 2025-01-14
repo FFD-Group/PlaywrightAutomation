@@ -7,10 +7,19 @@
     <link href="/static/css/styles.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="max-w-screen-lg">
-    <div x-data="flash" x-init="loadMessage" x-show="message" class="absolute top-10 left-5 rounded shadow border border-slate-400 bg-green-200">
-        <p class="py-5 px-10" x-text="message"></p>
-    </div>
+<body class="max-w-screen-lg" x-data>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="py-5 px-10 rounded shadow border border-slate-400"
+                :class="{'bg-red-100': '{{ category }}' == 'error', 'bg-green-100': '{{ category }}' == 'success'}">
+                    <span x-text="'{{ category }}'.toUpperCase()" class="font-bold"
+                    :class="{'text-red-700': '{{ category }}' == 'error', 'text-green-700': '{{ category }}' == 'success'}"></span>
+                    {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="p-2" x-data="supplierSelection" x-init="checkPassedSupplier" @fetchsupplier.window="fetchSupplierData()">
         <h1>Supplier Gathering</h1>
         <fieldset class="flex justify-center align-middle gap-2 m-4 p-2 border border-slate-200 rounded">
@@ -119,6 +128,40 @@
                 <button class="bg-red-500 text-white py-0" @click.prevent="deleteSelectedAutomation()" type="button">Delete</button>
             </fieldset>
         </form>
+    </div>
+    <div class="border border-slate-200 rounded m-2 p-2">
+        <h2 class="text-center font-bold text-lg">New upload</h2>
+        <p class="m-2">Upload a new file for processing.</p>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required>
+            <input type="submit" value="Upload" class="px-4 py-1">
+            <input type="hidden" readonly id="upload_supplier_id" name="supplier_id">
+            <input type="hidden" readonly id="upload_supplier_name" name="supplier_name">
+        </form>
+        <div x-data="uploadHistory" x-show="historyAvailable" @uploadsavailable.window="setHistoryAvailable(true)">
+            <button type="button" @click="fetchUploads()" class="my-2 py-1 px-2 decoration-double underline">View History</button>
+            <table x-show="showHistory" class="w-full p-2 m-2 text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>File</th>
+                    <th>Datetime</th>
+                    <th>Processed</th>
+                </tr>
+                <template x-for="upload in uploads">
+                    <tr>
+                        <td x-text="upload.id"></td>
+                        <td x-text="upload.filename"></td>
+                        <td x-text="getFormattedDateTime(upload.uploaded_at)"></td>
+                        <td>
+                            <input type="checkbox" readonly :checked="upload.processed" onclick="return false;">
+                        </td>
+                    </tr>
+                </template>
+                <tr x-show="!uploads || uploads.length < 1">
+                    <td colspan="4">No uploads.</td>
+                </tr>
+            </table>
+        </div>
     </div>
     <script type="text/javascript" src="../static/js/index.js"></script>
     <script type="text/javascript" src="../static/js/flash.js"></script>

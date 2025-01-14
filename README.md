@@ -36,7 +36,7 @@ add_sample_data()
 ```
 
 ### run server
-Start the flask server at http://127.0.0.1:5000 with:
+Start the flask server at http://127.0.0.1:8000 with:
 
 ```cli
 flask run --port 8000

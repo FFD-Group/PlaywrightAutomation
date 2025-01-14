@@ -34,6 +34,7 @@ assets_compiled
 downloads
 static/recordings/traces
 static/recordings/videos
+static/uploads
 
 # generated css
 static/css/styles.css

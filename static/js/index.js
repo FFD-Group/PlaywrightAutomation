@@ -1,5 +1,7 @@
 document.addEventListener('alpine:init', () => {
 
+    Alpine.store("supplierUploads", undefined);
+
     Alpine.data('currentSupplier', () => ({
         automations: [],
         supplier_id: null,
@@ -36,6 +38,55 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
+    Alpine.data('uploadHistory', () => ({
+        historyAvailable: false,
+        showHistory: false,
+        uploads: [],
+
+        setHistoryAvailable(b) {
+            this.showHistory = false;
+            this.historyAvailable = b;
+        },
+
+        getFormattedDateTime(timestamp) {
+            date = new Date(timestamp * 1000); // multiple by 1000 because of difference between JS and Python timestamps
+            return date.toLocaleDateString('en-GB', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
+
+        fetchUploads() {
+            supplierId = Alpine.store('supplierId');
+            if (!supplierId) {
+                throw "No supplier ID";
+            }
+            // Fetch supplier uploads
+            fetch("/uploads/" + supplierId, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    throw "Supplier uploads not fetched.";
+                }
+                return response.json();
+            })
+            .then((supplier_uploads) => {
+                this.uploads = supplier_uploads;
+                this.showHistory = true;
+            })
+            .catch((error) => {
+                console.error(error);
+                this.showHistory = false;
+            });
+        }
+    }));
+
     Alpine.data('supplierSelection', () => ({
         selection: null,
         load_disabled: true,
@@ -51,6 +102,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         fetchSupplierData() {
+            // Fetch supplier automations
             fetch("/automations/" + this.selection, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' }
@@ -68,10 +120,13 @@ document.addEventListener('alpine:init', () => {
                         supplier_id: this.selection
                     }
                 }));
+                window.dispatchEvent(new CustomEvent("uploadsavailable"));
                 let select = document.querySelector("#supplierselect");
                 let label = select.selectedOptions[0].text;
                 Alpine.store("selectedSupplierLabel", label);
                 Alpine.store("supplierId", this.selection);
+                document.getElementById("upload_supplier_id").value = this.selection;
+                document.getElementById("upload_supplier_name").value = label;
             })
             .catch((error) => {
                 console.error(error);

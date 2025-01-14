@@ -46,3 +46,24 @@ def get_supplier_automations(supplier_id: str) -> Row | str | None:
     return query_db(
         "SELECT * FROM automations WHERE supplier_id = ?", (int(supplier_id),)
     )
+
+
+def get_supplier_uploads(supplier_id: str) -> Row | str | None:
+    return query_db(
+        "SELECT * FROM uploads WHERE supplier_id = ?", (int(supplier_id),)
+    )
+
+
+def add_uploaded_file(
+    supplier_id: str, filename: str, uploaded_at: int, processed: int
+) -> int | None:
+    """Create an entry for an uploaded file."""
+    return insert_to_db(
+        "INSERT OR IGNORE INTO uploads (supplier_id, filename, uploaded_at, processed) VALUES (:id, :file, :datetime, :processed)",
+        {
+            "id": supplier_id,
+            "file": filename,
+            "datetime": uploaded_at,
+            "processed": processed,
+        },
+    )
