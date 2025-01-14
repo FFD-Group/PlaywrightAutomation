@@ -18,6 +18,7 @@ import requests
 import os
 import time
 from werkzeug.utils import secure_filename
+from trigger_process import ready_for_processing
 
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls"}
@@ -80,21 +81,21 @@ def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 
-# scheduler.add_job(
-#     id="heartbeat",
-#     func=betterstack_heartbeat,
-#     trigger="cron",
-#     hour="*/1",
-#     replace_existing=True,
-# )
-# scheduler.add_job(
-#     id="database-backup",
-#     func=backup_database,
-#     trigger="cron",
-#     day="*/1",
-#     hour="3",
-#     replace_existing=True,
-# )
+scheduler.add_job(
+    id="heartbeat",
+    func=betterstack_heartbeat,
+    trigger="cron",
+    hour="*/1",
+    replace_existing=True,
+)
+scheduler.add_job(
+    id="database-backup",
+    func=backup_database,
+    trigger="cron",
+    day="*/1",
+    hour="3",
+    replace_existing=True,
+)
 scheduler.add_listener(
     job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
 )
@@ -141,6 +142,13 @@ def index():
             uploaded_at = time.time()
             add_uploaded_file(supplier_id, filename, uploaded_at, 0)
             flash("File uploaded for processing", "success")
+            zwd = WorkDrive()
+            zwd.upload_file(
+                os.getenv("Z_WD_UPLOAD_FOLDER_ID"),
+                os.path.join(app.config["UPLOAD_FOLDER"], filename),
+            )
+            file_id = zwd.get_last_file_id()
+            ready_for_processing(file_id, "manual", uploaded_at, supplier_id)
             return redirect(url_for("index", supplier_id=supplier_id))
         else:
             flash("Invalid file format", "error")
