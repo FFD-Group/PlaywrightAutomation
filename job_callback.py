@@ -3,6 +3,7 @@ from storage import WorkDrive
 from automations import get_job_location, get_automation_card_data
 from suppliers import get_supplier_id
 import os
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 from app import scheduler
@@ -97,7 +98,7 @@ def job_callback(event) -> None:
             ready_for_processing(
                 zwd.get_last_file_id(),
                 "Automation",
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                time.time(),
                 get_supplier_id(supplier_details["supplier_name"]),
             )
 
