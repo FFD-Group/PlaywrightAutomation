@@ -8,6 +8,16 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="max-w-screen-lg" x-data>
+    <div x-data="FlashMessages" @newflashmessage.window="addFlashMessage($event.detail)">
+        <template x-for="msg in flashed_messages">
+            <p class="py-5 px-10 rounded shadow border border-slate-400 transition-opacity"
+            :class="{'bg-red-100': msg.category == 'error', 'bg-green-100': msg.category == 'success'}">
+                <span x-text="msg.category?.toUpperCase()" class="font-bold"
+                :class="{'text-red-700': msg.category == 'error', 'text-green-700': msg.category == 'success'}"></span>
+                <span x-text="msg.message"></span>
+            </p>
+        </template>
+    </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -41,7 +51,7 @@
         </fieldset>
     </div>
     <div class="flex w-full">
-        <form class="border border-slate-200 rounded m-2 p-2" x-data="newAutomation"> <!-- New Automation -->
+        <form id="new_automation" class="border border-slate-200 rounded m-2 p-2" x-data="newAutomation"> <!-- New Automation -->
             <h2 class="text-center font-bold text-lg">New Automation</h2>
             <fieldset>
                 <label for="name">Name
@@ -69,7 +79,113 @@
                 </label>
             </fieldset>
             <fieldset>
-                <button type="submit" @click.prevent="save()" x-text="(type == null || type == 1) ? 'Save' : 'Build & Test'"></button>
+                <div x-show="show_sample_upload">
+                    <div class="flex justify-between">
+                        <h3 class="text-center font-bold text-lg">Sample file</h3>
+                        <p>Step 1 of 3</p>
+                    </div>
+                    <label for="skip_rows">Skip rows
+                        <input type="number" id="sample_skip_rows" name="skip_rows" x-model="skip_rows" required value="0">
+                    </label>
+                    <label for="sample_file">Sample file
+                        <input type="file" id="sample_upload_file" name="sample_file" x-model="sample_file" required accept=".csv,.xls,.xlsx">
+                    </label>
+                    <button type="submit" @click.prevent.stop="uploadSampleFile()">Upload Sample</button>
+                </div>
+                <div x-show="show_column_mappings">
+                    <div class="flex justify-between">
+                        <h3 class="text-center font-bold text-lg">Column Mapping</h3>
+                        <p>Step 2 of 3</p>
+                    </div>
+                    <label for="cm_sku">SKU:
+                        <select name="cm_sku" required x-model="cm_sku" @change="updateColumnMappings($event.target)">
+                            <option value="" selected>No Column</option>
+                            <template x-for="column in sample_file_columns">
+                                <option :value="column" x-text="column"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label for="cm_stock_availability">Stock Availability:
+                        <select name="cm_stock_availability" x-model="cm_stock_availability" @change="updateColumnMappings($event.target)">
+                            <option value="" selected>No Column</option>
+                            <template x-for="column in sample_file_columns">
+                                <option :value="column" x-text="column"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label for="cm_price">Price:
+                        <select name="cm_price" x-model="cm_price" @change="updateColumnMappings($event.target)">
+                            <option value="" selected>No Column</option>
+                            <template x-for="column in sample_file_columns">
+                                <option :value="column" x-text="column"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label for="cm_cost">Cost:
+                        <select name="cm_cost" x-model="cm_cost" @change="updateColumnMappings($event.target)">
+                            <option value="" selected>No Column</option>
+                            <template x-for="column in sample_file_columns">
+                                <option :value="column" x-text="column"></option>
+                            </template>
+                        </select>
+                    </label>
+                    <label for="cm_stock_quantity">Stock Quantity:
+                        <select name="cm_stock_quantity" x-model="cm_stock_quantity" @change="updateColumnMappings($event.target)">
+                            <option value="" selected>No Column</option>
+                            <template x-for="column in sample_file_columns">
+                                <option :value="column" x-text="column"></option>
+                            </template>
+                        </select>
+                    </label>
+                </div>
+                <div x-show="show_processing_options">
+                    <div class="flex justify-between">
+                        <h3 class="text-center font-bold text-lg">Processing Options</h3>
+                        <p>Step 3 of 3</p>
+                    </div>
+                    <label for="file_type_select">File type:
+                        <select name="file_type_select" disabled>
+                            <option value="stock_file">Stock File</option>
+                            <option value="price_file">Price File</option>
+                            <option value="stock_and_price_file">Stock & Price File</option>
+                        </select>
+                        <input type="hidden" name="file_type">
+                    </label>
+                    <label for="stock_strategy">Stock strategy:
+                        <select name="stock_strategy_select" disabled>
+                            <option value="availability_only">Availability Only</option>
+                            <option value="levels_only">Levels Only</option>
+                            <option value="availability_and_levels">Availability & Levels</option>
+                        </select>
+                        <input type="hidden" name="stock_strategy">
+                    </label>
+                    <label for="price_strategy">Price strategy:
+                        <select name="price_strategy">
+                            <option value="list_prices_only">List Prices</option>
+                            <option value="cost_prices_only">Cost Prices</option>
+                        </select>
+                    </label>
+                    <!-- if list - discount required: allow for entering a percentage -->
+                    <!-- add an advanced checkbox - if ticked, allow for entering formula over basic percent -->
+                    <!-- checkbox for multi-step discount - display column for differentiating equipment discount then for each distinct value in column - allow setting a discount/formula-->
+                    <label for="specials_type">Specials:
+                        <select name="specials_type">
+                            <option value="seperate_specials_file">Specials are on a separate file</option>
+                            <option value="specials_included">Specials are included in the file</option>
+                        </select>
+                    </label>
+                    <label for="specials_strategy">Specials Strategy:
+                        <select name="specials_strategy">
+                            <option value="explicit_specials_duration">Special Durations are given Explicitly</option>
+                            <option value="implicit_specials_duration">Special Durations are Implied</option>
+                        </select>
+                        <p x-text="specials_strategy_description"></p>
+                    </label>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <button :disabled="disable_save" type="submit" @click.prevent="save()" x-text="(type == null || type == 1) ? 'Save' : 'Build & Test'"></button>
             </fieldset>
         </form>
         <form x-data="currentSupplier" class="border border-slate-200 rounded m-2 p-2"

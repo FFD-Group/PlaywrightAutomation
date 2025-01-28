@@ -2,6 +2,22 @@ document.addEventListener('alpine:init', () => {
 
     Alpine.store("supplierUploads", undefined);
 
+    Alpine.data('FlashMessages', () => ({
+        flashed_messages: [],
+
+        addFlashMessage(detail) {
+            if (detail) {
+                this.flashed_messages.push(detail);
+                idx = this.flashed_messages.indexOf(detail);
+                setTimeout(() => {
+                    if (idx > -1) {
+                        this.flashed_messages.splice(idx, 1);
+                    }
+                }, 5000);
+            }
+        }
+    }));
+
     Alpine.data('currentSupplier', () => ({
         automations: [],
         supplier_id: null,
@@ -139,7 +155,66 @@ document.addEventListener('alpine:init', () => {
         url: '',
         name: '',
         location: '',
+        disable_save: false,
         supplier_id: null,
+        show_sample_upload: true,
+        show_column_mappings: false,
+        show_processing_options: false,
+        sample_file_columns: [],
+        sample_file: null,
+        skip_rows: 0,
+        cm_sku: "",
+        cm_stock_availability: "",
+        cm_price: "",
+        cm_cost: "",
+        cm_stock_quantity: "",
+
+        updateColumnMappings(target) {
+            console.log(target);
+            console.log(target.value);
+            console.log(this.columns_mapped);
+            if (target.value == "") return;
+            ["cm_sku", "cm_stock_availability", "cm_price", "cm_cost", "cm_stock_quantity"].forEach((select) => {
+                if (target.name == select) return;
+                if (this[select] == target.value) {
+                    this.disable_save = true;
+                    window.dispatchEvent(new CustomEvent("newflashmessage", {detail:{"category": "error", "message": "Can't duplicate column mappings."}}));
+                    target._x_model.set("");
+                    return;
+                }
+            });
+        },
+
+        uploadSampleFile() {
+            if (!this.sample_file) {
+                console.error("No sample file provided!");
+                return;
+            }
+            const data = new FormData();
+            const files = document.getElementById("sample_upload_file");
+            data.append("file", files.files[0]);
+            data.append("skip_rows", document.getElementById("sample_skip_rows").value);
+            fetch("/upload-sample-file", {
+                method: 'POST',
+                body: data
+            })
+            .then((response) => {
+                return response.json();
+            })
+            .then((result) => {
+                if (result["result"] == "error") {
+                    throw Error("An error occured!" + result["detail"]);
+                }
+                this.sample_file_columns = result["detail"];
+                console.log(this.sample_file_columns);
+                window.dispatchEvent(new CustomEvent("newflashmessage", {detail: {"category": "success", "message": "Sample file read. Map your columns."}}));
+                this.show_sample_upload = false;
+                this.show_column_mappings = true;
+            })
+            .catch((error) => {
+                window.dispatchEvent(new CustomEvent("newflashmessage", {detail: {"category": "error", "message": error}}));
+            });
+        },
 
         save() {
             this.supplier_id = Alpine.store('supplierId');
