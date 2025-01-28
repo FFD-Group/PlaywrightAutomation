@@ -3,6 +3,7 @@ from flask import (
     Flask,
     g,
     json,
+    jsonify,
     render_template,
     request,
     has_request_context,
@@ -19,8 +20,10 @@ import os
 import time
 from werkzeug.utils import secure_filename
 from trigger_process import ready_for_processing
+from sample_uploads import get_file_column_names
 
 UPLOAD_FOLDER = "static/uploads"
+TEMP_FOLDER = "temp"
 ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls"}
 
 
@@ -37,6 +40,7 @@ dictConfig({"version": 1, "root": {"level": os.getenv("LOGGING_LEVEL")}})
 app = Flask(__name__, static_folder="static/")
 app.config.from_object(Config())
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["TEMP_FOLDER"] = TEMP_FOLDER
 
 app.secret_key = b"tghJUV813_d/emp1"
 
@@ -193,6 +197,33 @@ def get_uploads(supplier_id: int):
     uploads = get_supplier_uploads(supplier_id)
     result = [dict(row) for row in uploads]
     return result
+
+
+@app.route("/upload-sample-file", methods=["POST"])
+def get_uploaded_file_columns() -> list[str]:
+    # check if the post request has the file part
+    if "file" not in request.files:
+        return jsonify({"result": "error", "detail": "No file part"})
+    file = request.files["file"]
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
+    if file.filename == "":
+        return jsonify({"result": "error", "detail": "No selected file"})
+    if file and allowed_file(file.filename):
+        skiprows = (
+            request.form["skip_rows"] if "skip_rows" in request.form else 0
+        )
+        filename = secure_filename(file.filename)
+        temp_file_path = os.path.join(app.config["TEMP_FOLDER"], filename)
+        try:
+            file.save(temp_file_path)
+            # read file into pandas then return column names
+            column_names = get_file_column_names(temp_file_path, int(skiprows))
+            os.remove(temp_file_path)
+        except Exception as e:
+            return jsonify({"result": "error", "detail": str(e)})
+        return jsonify({"result": "success", "detail": column_names})
+    return jsonify({"result": "error", "detail": "File type not supported!"})
 
 
 ## AUTOMATIONS
