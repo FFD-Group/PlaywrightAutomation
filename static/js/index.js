@@ -180,6 +180,12 @@ document.addEventListener('alpine:init', () => {
         show_adv_pricing: false,
         adv_pricing_groups: [],
 
+        backToColumnMappings() {
+            this.show_processing_options = false;
+            this.show_column_mappings = true;
+            this.disable_save = true;
+        },
+
         pricingGroupByChange() {
             if (!this.sample_file) {
                 console.error("No sample file provided!");

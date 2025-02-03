@@ -144,6 +144,7 @@
                         <h3 class="text-center font-bold text-lg">Processing Options</h3>
                         <p>Step 3 of 3</p>
                     </div>
+                    <p><a @click="backToColumnMappings()" class="underline my-1 text-blue-700 font-bold cursor-pointer">Back to column mappings</a></p>
                     <label for="file_type_select">File type:
                         <select name="file_type_select" disabled x-model="processing_file_type">
                             <option value="processing_file_type" x-text="processing_file_type"></option>
