@@ -51,7 +51,7 @@
         </fieldset>
     </div>
     <div class="flex w-full">
-        <form id="new_automation" class="border border-slate-200 rounded m-2 p-2" x-data="newAutomation"> <!-- New Automation -->
+        <form id="new_automation" class="border border-slate-200 rounded m-2 p-2 max-w-[600px]" x-data="newAutomation"> <!-- New Automation -->
             <h2 class="text-center font-bold text-lg">New Automation</h2>
             <fieldset>
                 <label for="name">Name
@@ -137,6 +137,7 @@
                             </template>
                         </select>
                     </label>
+                    <button type="button" @click.prevent="setColumnMapping()">Set columns</button>
                 </div>
                 <div x-show="show_processing_options">
                     <div class="flex justify-between">
@@ -144,43 +145,79 @@
                         <p>Step 3 of 3</p>
                     </div>
                     <label for="file_type_select">File type:
-                        <select name="file_type_select" disabled>
-                            <option value="stock_file">Stock File</option>
-                            <option value="price_file">Price File</option>
-                            <option value="stock_and_price_file">Stock & Price File</option>
+                        <select name="file_type_select" disabled x-model="processing_file_type">
+                            <option value="processing_file_type" x-text="processing_file_type"></option>
                         </select>
-                        <input type="hidden" name="file_type">
                     </label>
                     <label for="stock_strategy">Stock strategy:
-                        <select name="stock_strategy_select" disabled>
-                            <option value="availability_only">Availability Only</option>
-                            <option value="levels_only">Levels Only</option>
-                            <option value="availability_and_levels">Availability & Levels</option>
+                        <select name="stock_strategy_select" disabled x-model="stock_strategy">
+                            <option value="stock_strategy" x-text="stock_strategy"></option>
                         </select>
-                        <input type="hidden" name="stock_strategy">
                     </label>
                     <label for="price_strategy">Price strategy:
-                        <select name="price_strategy">
+                        <select name="price_strategy" :disabled="disable_price_strategy" x-model="price_strategy">
                             <option value="list_prices_only">List Prices</option>
                             <option value="cost_prices_only">Cost Prices</option>
                         </select>
                     </label>
-                    <!-- if list - discount required: allow for entering a percentage -->
-                    <!-- add an advanced checkbox - if ticked, allow for entering formula over basic percent -->
-                    <!-- checkbox for multi-step discount - display column for differentiating equipment discount then for each distinct value in column - allow setting a discount/formula-->
+                    <div class="border border-slate-100 rounded p-0.5 m-1" x-show="(processing_file_type != 'Stock file')">
+                        <label for="pricing_discount" x-show="price_strategy && price_strategy.includes('list_prices_only')">Discount:
+                            <input type="number" name="pricing_discount" step="0.01" required x-model="pricing_discount"> %
+                        </label>
+                        <label for="pricing_markup" x-show="processing_file_type.includes('Price')">Markup:
+                            <input type="number" name="pricing_markup" step="0.01" required x-model="pricing_markup"> %
+                        </label>
+                        <label for="show_adv_pricing">
+                            <input type="checkbox" name="show_adv_pricing" x-model="show_adv_pricing">
+                            Advanced Pricing
+                        </label>
+                        <div class="rounded p-0 m-1" x-show="show_adv_pricing">
+                            <p class="w-full">Select a column to group discount/markups by. Clicking on 'Get Groups' will get all unique values from the column and let you enter individual pricing settings for each. Any rows or column values not entered below will use the default discount and markup from above.</p>
+                            <label for="adv_pricing_group_column">Price by:
+                                <select name="adv_pricing_group_column" required x-model="adv_pricing_group_column">
+                                    <option value="" disabled>Select a column</option>
+                                    <template x-for="column in sample_file_columns">
+                                        <option :value="column" x-text="column"></option>
+                                    </template>
+                                </select> 
+                            </label>
+                            <button type="button" @click.prevent="pricingGroupByChange()">Get Groups</button>
+                            <table class="w-full">
+                                <tr>
+                                    <th class="border border-slate-300">Group</th>
+                                    <th class="border border-slate-300">Discount formula</th>
+                                    <th class="border border-slate-300">Markup</th>
+                                    <th class="border border-slate-300">Extra</th>
+                                </tr>
+                                <template x-for="group in adv_pricing_groups">
+                                    <tr class="border-b border-slate-300">
+                                        <td class="border border-slate-300 whitespace-nowrap px-1"><p x-text="group.value"></p></td>
+                                        <td class="border border-slate-300 px-1"><input type="text" x-model="group.discount" placeholder="($P*0.58)+10" pattern="[\(\)\*0-9\.]*(\$P)[\(\)\*0-9\.]*"><br>
+                                            <small>Price/cost variable: <strong>$P</strong>. Allowed characters: <i>()*.+</i> and digits.</small>
+                                        </td>
+                                        <td class="border border-slate-300 px-1"><label class="flex items-center p-0 m-0 gap-0" for="group_markup"><input style="width:75px" type="number" x-model="group.markup" step="0.01" placeholder="6.5">%</label></td>
+                                        <td class="border border-slate-300 px-1"><input type="text" style="width:75px" x-model="group.extra" placeholder="+20" pattern="[0-9\.\+\-]*"></td>
+                                    </tr>
+                                </template>
+                            </table>
+                        </div>
+                    </div>
                     <label for="specials_type">Specials:
-                        <select name="specials_type">
+                        <select name="specials_type" x-model="specials_type">
                             <option value="seperate_specials_file">Specials are on a separate file</option>
                             <option value="specials_included">Specials are included in the file</option>
                         </select>
                     </label>
-                    <label for="specials_strategy">Specials Strategy:
-                        <select name="specials_strategy">
-                            <option value="explicit_specials_duration">Special Durations are given Explicitly</option>
-                            <option value="implicit_specials_duration">Special Durations are Implied</option>
-                        </select>
+                    <div class="border border-slate-100 rounded p-4 m-1" x-show="specials_type == 'specials_included'">
+                        <h4 class="font-bold text-md text-center">Specials</h4>
+                        <label for="specials_strategy">Specials Strategy:
+                            <select name="specials_strategy">
+                                <option value="explicit_specials_duration">Special Durations are given Explicitly</option>
+                                <option value="implicit_specials_duration">Special Durations are Implied</option>
+                            </select>
+                        </label>
                         <p x-text="specials_strategy_description"></p>
-                    </label>
+                    </div>
                 </div>
             </fieldset>
 

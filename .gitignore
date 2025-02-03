@@ -35,6 +35,7 @@ downloads
 static/recordings/traces
 static/recordings/videos
 static/uploads
+temp
 
 # generated css
 static/css/styles.css

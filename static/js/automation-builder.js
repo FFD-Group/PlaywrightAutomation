@@ -273,6 +273,8 @@ document.addEventListener('alpine:init', () => {
 
             console.debug(data);
 
+            next_step_url = "";
+
             fetch("/automations/" + data["supplier_id"] + "/save?supplier_name=" + encodeURIComponent(Alpine.store("supplierName")), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -287,7 +289,22 @@ document.addEventListener('alpine:init', () => {
             })
             .then((json) => {
                 console.log(json);
-                window.location = json;
+                next_step_url = json; //"/?automation_id={automation_id}&supplier_id={supplier_id}&supplier_name={supplier_name}"
+                first_param = next_step_url.split("&")[0];
+                automation_id = first_param.split("=")[1];
+                processing_options = JSON.parse(localStorage.getItem("processing_options"));
+                return fetch("/automations/" + automation_id + "/save_processing_options", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(processing_options)
+                });
+            })
+            .then((save_processing_options_response) => {
+                console.log(save_processing_options_response);
+            })
+            .then(() => {
+                window.location = next_step_url;
+                return;
             })
             .catch((error) => {
                 console.error(error);

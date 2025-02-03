@@ -30,6 +30,10 @@ body {
 
         button {
             @apply bg-lime-600 w-full rounded text-white p-4 font-bold text-xl m-2;
+
+            &[disabled=disabled] {
+                @apply bg-slate-300;
+            }
         }
     }
 

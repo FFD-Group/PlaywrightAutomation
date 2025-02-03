@@ -155,7 +155,7 @@ document.addEventListener('alpine:init', () => {
         url: '',
         name: '',
         location: '',
-        disable_save: false,
+        disable_save: true,
         supplier_id: null,
         show_sample_upload: true,
         show_column_mappings: false,
@@ -168,16 +168,95 @@ document.addEventListener('alpine:init', () => {
         cm_price: "",
         cm_cost: "",
         cm_stock_quantity: "",
+        specials_strategy_description: "some text",
+        processing_file_type: "Stock & Price file",
+        stock_strategy: null,
+        price_strategy: "list_prices_only",
+        disable_price_strategy: false,
+        pricing_markup: 0.00,
+        pricing_discount: 0.00,
+        specials_type: "seperate_specials_file",
+        adv_pricing_group_column: "",
+        show_adv_pricing: false,
+        adv_pricing_groups: [],
+
+        pricingGroupByChange() {
+            if (!this.sample_file) {
+                console.error("No sample file provided!");
+                return;
+            }
+            const data = new FormData();
+            const files = document.getElementById("sample_upload_file");
+            data.append("file", files.files[0]);
+            data.append("skip_rows", document.getElementById("sample_skip_rows").value);
+            data.append("group_by_column", this.adv_pricing_group_column);
+            fetch("/distinct-column-values", {
+                method: 'POST',
+                body: data
+            })
+            .then((response) => {
+                return response.json();
+            })
+            .then((result) => {
+                if (result["result"] == "error") {
+                    throw Error("An error occured!" + result["detail"]);
+                }
+                console.log(result);
+                groups = result["detail"];
+                this.adv_pricing_groups = [];
+                groups.forEach((group) => {
+                    if (!group) return;
+                    this.adv_pricing_groups.push({
+                        value: group,
+                        discount: undefined,
+                        markup: undefined,
+                        extra: undefined
+                    });
+                });
+                window.dispatchEvent(new CustomEvent("newflashmessage", {detail: {"category": "success", "message": "Column values read, enter pricing data."}}));
+            })
+            .catch((error) => {
+                window.dispatchEvent(new CustomEvent("newflashmessage", {detail: {"category": "error", "message": error}}));
+            });
+        },
+
+        setColumnMapping() {
+            if (this.cm_sku == "") {
+                window.dispatchEvent(new CustomEvent("newflashmessage", {detail:{"category": "error", "message": "SKU is a required column."}}));
+                return;
+            }
+            // work out file type depending on mapped columns
+            if ((this.cm_price == "" && this.cm_cost == "")
+                && (this.cm_stock_availability != "" || this.cm_stock_quantity != ""))
+            {
+                this.processing_file_type = "Stock file";
+                this.disable_price_strategy = true;
+                this.price_strategy = null;
+            } 
+            else if ((this.cm_stock_availability == "" && this.cm_stock_quantity == "")
+                    && (this.cm_price != "" || this.cm_cost != ""))
+            {
+                this.processing_file_type = "Price file";
+                this.disable_price_strategy = false;
+            }
+            else this.processing_file_type = "Stock & Price file";
+            // work out stock strategy depending on mapped columns
+            if (this.processing_file_type != "Price file") {
+                if (this.cm_stock_availability == "" && this.cm_stock_quantity != "") this.stock_strategy = "Levels Only";
+                else if (this.cm_stock_availability != "" && this.cm_stock_quantity == "") this.stock_strategy = "Availability Only";
+                else this.stock_strategy = "Availability & Levels";
+            } else this.stock_strategy = "No Stock Data";
+            // hide column mappings and show processing options
+            this.show_column_mappings = false;
+            this.show_processing_options = true;
+            this.disable_save = false;
+        },
 
         updateColumnMappings(target) {
-            console.log(target);
-            console.log(target.value);
-            console.log(this.columns_mapped);
             if (target.value == "") return;
             ["cm_sku", "cm_stock_availability", "cm_price", "cm_cost", "cm_stock_quantity"].forEach((select) => {
                 if (target.name == select) return;
                 if (this[select] == target.value) {
-                    this.disable_save = true;
                     window.dispatchEvent(new CustomEvent("newflashmessage", {detail:{"category": "error", "message": "Can't duplicate column mappings."}}));
                     target._x_model.set("");
                     return;
@@ -222,11 +301,53 @@ document.addEventListener('alpine:init', () => {
                 alert("Please select and load a supplier first.");
                 return;
             }
+            
+            processing_options = {
+                skip_rows: this.skip_rows,
+                sku_column: this.cm_sku,
+                stock_availability_column: this.cm_stock_availability,
+                price_column: this.cm_price,
+                cost_column: this.cm_cost,
+                stock_quantity_column: this.cm_stock_quantity,
+                data_type: this.processing_file_type,
+                stock_strategy: this.stock_strategy,
+                price_strategy: this.price_strategy,
+                pricing_markup: this.pricing_markup,
+                pricing_discount: this.pricing_discount,
+                specials_type: this.specials_type,
+                adv_pricing_group_column: this.adv_pricing_group_column,
+                adv_pricing_groups: this.adv_pricing_groups
+            };
             if (this.type == 0) { // automation type
-                supplier_name = Alpine.store('selectedSupplierLabel');
-                let url = new URL("/automation-builder/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location) + "&supplier_name=" + encodeURIComponent(supplier_name), document.baseURI);
-                window.location.href = url;
-                return;
+                fetch("/automations/validate_processing_options", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(processing_options)
+                })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw "Error saving processing options.";
+                    }
+                    return response.json();
+                })
+                .then((validation) => {
+                    if (validation["result"] == "error") {
+                        window.dispatchEvent(new CustomEvent("newflashmessage", {detail:{"category": "error", "message": validation["detail"]}}));
+                        console.error(validation);
+                        throw "Validation failed.";
+                    }
+                    console.log(validation);
+                })
+                .then(() => {
+                    supplier_name = Alpine.store('selectedSupplierLabel');
+                    let url = new URL("/automation-builder/" + this.supplier_id + "/new?name=" + encodeURIComponent(this.name) + "&save_location=" + encodeURIComponent(this.location) + "&supplier_name=" + encodeURIComponent(supplier_name), document.baseURI);
+                    localStorage.setItem("processing_options", JSON.stringify(processing_options));
+                    window.location.href = url;
+                    return;
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
             }   
             // download type                
             data = {
@@ -236,10 +357,31 @@ document.addEventListener('alpine:init', () => {
                 download_url: this.url,
                 supplier_name: Alpine.store('selectedSupplierLabel')
             };
-            fetch("/automations/download/save", {
+            fetch("/automations/validate_processing_options", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(processing_options)
+            })
+            .then((response) => {
+                if (!response.ok) {
+                    throw "Error saving processing options.";
+                }
+                return response.json();
+            })
+            .then((validation) => {
+                if (validation["result"] == "error") {
+                    window.dispatchEvent(new CustomEvent("newflashmessage", {detail:{"category": "error", "message": validation["detail"]}}));
+                    console.error(validation);
+                    throw "Validation failed.";
+                }
+                console.log(validation);
+            })
+            .then(() => {
+                return fetch("/automations/download/save", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
             })
             .then((response) => {
                 if (!response.ok) {
@@ -249,6 +391,15 @@ document.addEventListener('alpine:init', () => {
             })
             .then((inserted_row) => {
                 alert("Inserted download with ID: " + inserted_row);
+                // Saving processing options linked with ID:
+                return fetch("/automations/" + inserted_row + "/save_processing_options", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(processing_options)
+                });
+            })
+            .then((save_processing_options_response) => {
+                console.log(save_processing_options_response);
             })
             .finally(() => {
                 // Reload the existing automation list

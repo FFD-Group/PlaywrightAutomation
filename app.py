@@ -20,7 +20,8 @@ import os
 import time
 from werkzeug.utils import secure_filename
 from trigger_process import ready_for_processing
-from sample_uploads import get_file_column_names
+from sample_uploads import get_file_column_names, get_column_values
+from processing_options import add_processing_options
 
 UPLOAD_FOLDER = "static/uploads"
 TEMP_FOLDER = "temp"
@@ -85,21 +86,21 @@ def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 
-scheduler.add_job(
-    id="heartbeat",
-    func=betterstack_heartbeat,
-    trigger="cron",
-    hour="*/1",
-    replace_existing=True,
-)
-scheduler.add_job(
-    id="database-backup",
-    func=backup_database,
-    trigger="cron",
-    day="*/1",
-    hour="3",
-    replace_existing=True,
-)
+# scheduler.add_job(
+#     id="heartbeat",
+#     func=betterstack_heartbeat,
+#     trigger="cron",
+#     hour="*/1",
+#     replace_existing=True,
+# )
+# scheduler.add_job(
+#     id="database-backup",
+#     func=backup_database,
+#     trigger="cron",
+#     day="*/1",
+#     hour="3",
+#     replace_existing=True,
+# )
 scheduler.add_listener(
     job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
 )
@@ -219,11 +220,32 @@ def get_uploaded_file_columns() -> list[str]:
             file.save(temp_file_path)
             # read file into pandas then return column names
             column_names = get_file_column_names(temp_file_path, int(skiprows))
-            os.remove(temp_file_path)
         except Exception as e:
             return jsonify({"result": "error", "detail": str(e)})
         return jsonify({"result": "success", "detail": column_names})
     return jsonify({"result": "error", "detail": "File type not supported!"})
+
+
+@app.route("/distinct-column-values", methods=["POST"])
+def get_column_distinct_values():
+    if "file" not in request.files:
+        return jsonify({"result": "error", "detail": "No file part"})
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"result": "error", "detail": "No selected file"})
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        skip_rows = request.form["skip_rows"]
+        group_by_column = request.form["group_by_column"]
+        temp_file_path = os.path.join(app.config["TEMP_FOLDER"], filename)
+        column_values = get_column_values(
+            temp_file_path, int(skip_rows), group_by_column
+        )
+        return jsonify({"result": "success", "detail": column_values})
+    else:
+        return jsonify(
+            {"result": "error", "detail": "File type not supported!"}
+        )
 
 
 ## AUTOMATIONS
@@ -257,6 +279,87 @@ def save_automation(supplier_id: int):
         app.logger.error(
             "Something went wrong saving the automation.", exc_info=True
         )
+
+
+@app.route("/automations/validate_processing_options", methods=["POST"])
+def validate_processing_options():
+    data = request.get_json()
+    # skip_rows: int - default 0
+    if not data["skip_rows"] or int(data["skip_rows"]) < 0:
+        return jsonify(
+            {"result": "error", "detail": "'skip_rows' is required."}
+        )
+    # sku_column: str - required
+    if not data["sku_column"]:
+        return jsonify(
+            {"result": "error", "detail": "'SKU' column must be mapped."}
+        )
+    #     price_column: this.cm_price,                                  str - could be ""
+    #     cost_column: this.cm_cost,                                    str - could be ""
+    #     data_type: this.processing_file_type,                         str - determines extra validation:
+    #                       "stock file": ONE OF stock_availability_column, stock_quantity_column REQUIRED
+    #                       "price file": ONE OF price_column, cost_column REQUIRED
+    if data["data_type"] == "Stock file":
+        #   stock_availability_column: str - could be ""
+        #   stock_quantity_column: str - could be ""
+        if (
+            data["stock_availability_column"] == ""
+            and data["stock_quantity_column"] == ""
+        ):
+            return jsonify(
+                {
+                    "result": "error",
+                    "detail": "At least one of 'Stock Availability', 'Stock Quantity' columns must be mapped.",
+                }
+            )
+        #   stock_strategy: str|None - optional depending on data_type
+        if not data["stock_strategy"] or data["stock_strategy"] == "":
+            return jsonify(
+                {"result": "error", "detail": "Stock strategy is required."}
+            )
+    elif data["data_type"] == "Price file":
+        if data["price_column"] == "" and data["cost_column"] == "":
+            return jsonify(
+                {
+                    "result": "error",
+                    "detail": "At least one of 'Price', 'Cost' columns must be mapped.",
+                }
+            )
+        #   price_strategy: str|None - optional depending on data_type
+        if not data["price_strategy"] or data["price_strategy"] == "":
+            return jsonify(
+                {"result": "error", "detail": "Price strategy is required."}
+            )
+        #   pricing_markup: float - optional depending on data type
+        if not data["pricing_markup"]:
+            return jsonify({"result": "error", "detail": "Markup is required."})
+        #   pricing_discount: float - optional depending on data type
+        if not data["pricing_discount"]:
+            return jsonify(
+                {"result": "error", "detail": "Discount is required."}
+            )
+    # specials_type: str - required
+    if not data["specials_type"]:
+        return jsonify(
+            {"result": "error", "detail": "Specials Type is required."}
+        )
+    # adv_pricing_group_column: str|None - optional
+    # adv_pricing_groups: list[Object] - optional, each Object represents a value in grouping column
+
+    return jsonify(
+        {"result": "sucess", "detail": "Processing options validated."}
+    )
+
+
+@app.route(
+    "/automations/<int:automation_id>/save_processing_options", methods=["POST"]
+)
+def save_processing_options(automation_id: int):
+    data = request.get_json()
+    ## @TODO: save to database with relation to automation
+    add_processing_options(automation_id, str(data))
+    ## @TODO: save to Zoho Creator app
+    return "saved"
 
 
 @app.route("/test-automation/<int:supplier_id>", methods=["POST"])
@@ -293,7 +396,11 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
         (request.remote_addr if has_request_context() else None),
     )
     app.logger.info("Deleting automation: " + str(logdata))
-    deleted_schedules = remove_automation_schedule(scheduler, automation_id)
+    deleted_schedules = None
+    try:
+        deleted_schedules = remove_automation_schedule(scheduler, automation_id)
+    except Exception as e:
+        print(e)
     deleted_automations = delete_automation(automation_id, supplier_id)
     result = {}
     if deleted_automations:
