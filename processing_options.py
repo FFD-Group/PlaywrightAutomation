@@ -16,6 +16,13 @@ def add_processing_options(automation_id: int, options: str) -> None:
     )
 
 
+def delete_automation_processing_options(automation_id: int) -> None:
+    delete_from_db(
+        "DELETE FROM processing_options WHERE automation_id = ?",
+        (automation_id,),
+    )
+
+
 def delete_processing_options(id: int) -> None:
     delete_from_db("DELETE FROM processing_options WHERE id = ?", (id,))
 

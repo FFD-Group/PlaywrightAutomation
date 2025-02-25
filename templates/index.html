@@ -163,7 +163,7 @@
                     </label>
                     <div class="border border-slate-100 rounded p-0.5 m-1" x-show="(processing_file_type != 'Stock file')">
                         <label for="pricing_discount" x-show="price_strategy && price_strategy.includes('list_prices_only')">Discount:
-                            <input type="number" name="pricing_discount" step="0.01" required x-model="pricing_discount"> %
+                            <input type="number" name="pricing_discount" step="0.01" :required="price_strategy && price_strategy.includes('list_prices_only')" x-model="pricing_discount"> %
                         </label>
                         <label for="pricing_markup" x-show="processing_file_type.includes('Price')">Markup:
                             <input type="number" name="pricing_markup" step="0.01" required x-model="pricing_markup"> %
@@ -246,6 +246,50 @@
                             <p class="even:bg-slate-100 font-bold p-2 truncate max-w-md">Start URL: <span class="font-normal" x-text="automation.url"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="get_formatted_run_time(automation.next_run_time)"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
+                            <!-- Processing Options -->
+                            <div x-data="{ options: automation.processing_options, open: false }">
+                                <button class="p-0 text-sm w-auto bg-inherit text-black font-normal underline m-1" @click.prevent.stop="open = !open"><span x-text="open ? 'Hide' : 'Show'"></span> Processing Options</button>
+                                <div x-show="open" class="p-1">
+                                    <p class="font-bold">Skip Rows: <span class="italic font-normal" x-html="options.skip_rows"></span></p>
+                                    <p class="font-bold">Data type: <span class="italic font-normal" x-text="options.data_type"></span></p>
+                                    <p class="font-bold">Stock strategy: <span class="italic font-normal" x-text="options.stock_strategy"></span></p>
+                                    <p x-show="options.price_strategy != ''" class="font-bold">Price strategy: <span class="italic font-normal" x-text="options.price_strategy"></span></p>
+                                    <p x-show="options.pricing_markup != 0" class="font-bold">Markup: <span class="italic font-normal" x-text="options.pricing_markup"></span>&percnt;</p>
+                                    <p x-show="options.pricing_discount != 0" class="font-bold">Discount: <span class="italic font-normal" x-text="options.pricing_discount"></span>&percnt;</p>
+                                    <p class="font-bold">Specials type: <span class="italic font-normal" x-text="options.specials_type"></span></p>
+                                    <div>
+                                        <h3 class="text-center font-bold text-base my-1 border-b border-slate-300">Column Mapping</h3>
+                                        <p class="font-bold">Sku column: &quot;<span class="italic font-normal" x-text="options.sku_column"></span>&quot;</p>
+                                        <p x-show="options.stock_availability_column != ''" class="font-bold">Stock availability column: &quot;<span class="italic font-normal" x-text="options.stock_availability_column"></span>&quot;</p>
+                                        <p x-show="options.price_column != ''" class="font-bold">Price column: &quot;<span class="italic font-normal" x-text="options.price_column"></span>&quot;</p>
+                                        <p x-show="options.cost_column != ''" class="font-bold">Cost column: &quot;<span class="italic font-normal" x-text="options.cost_column"></span>&quot;</p>
+                                        <p x-show="options.stock_quantity_column != ''" class="font-bold">Stock quantity column: &quot;<span class="italic font-normal" x-text="options.stock_quantity_column"></span>&quot;</p>
+                                    </div>
+                                    <div x-show="options.adv_pricing_group_column != ''">
+                                        <h3 class="text-center font-bold text-base my-1 border-b border-slate-300">Advanced Pricing</h3>
+                                        <p class="font-bold">Group column: &quot;<span class="italic font-normal" x-text="options.adv_pricing_group_column"></span>&quot;</p>
+                                        <div>
+                                            <h3 class="text-center font-bold text-sm my-1 border-b border-slate-300">Groups</h3>
+                                            <table class="w-full">
+                                                <tr class="text-left">
+                                                    <th>Value</th>
+                                                    <th>Formula</th>
+                                                    <th>Markup</th>
+                                                    <th>Extra</th>
+                                                </tr>
+                                                <template x-for="group in options.adv_pricing_groups">
+                                                        <tr class="odd:bg-slate-100">
+                                                            <td x-text="group.value"></td>
+                                                            <td x-text="group.discount"></td>
+                                                            <td x-text="group.markup + '&percnt;'"></td>
+                                                            <td x-text="group.extra"></td>
+                                                        </tr>
+                                                </template>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="flex justify-around items-center">
                                 <p class="even:bg-slate-100 font-bold p-2">Current schedule: <span class="font-normal" x-text="automation.schedule"></span></p>
                                 <div x-show="automation.next_run_time && automation.schedule">

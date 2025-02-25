@@ -21,7 +21,11 @@ import time
 from werkzeug.utils import secure_filename
 from trigger_process import ready_for_processing
 from sample_uploads import get_file_column_names, get_column_values
-from processing_options import add_processing_options
+from processing_options import (
+    add_processing_options,
+    get_processing_options,
+    delete_automation_processing_options,
+)
 
 UPLOAD_FOLDER = "static/uploads"
 TEMP_FOLDER = "temp"
@@ -86,21 +90,21 @@ def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 
-# scheduler.add_job(
-#     id="heartbeat",
-#     func=betterstack_heartbeat,
-#     trigger="cron",
-#     hour="*/1",
-#     replace_existing=True,
-# )
-# scheduler.add_job(
-#     id="database-backup",
-#     func=backup_database,
-#     trigger="cron",
-#     day="*/1",
-#     hour="3",
-#     replace_existing=True,
-# )
+scheduler.add_job(
+    id="heartbeat",
+    func=betterstack_heartbeat,
+    trigger="cron",
+    hour="*/1",
+    replace_existing=True,
+)
+scheduler.add_job(
+    id="database-backup",
+    func=backup_database,
+    trigger="cron",
+    day="*/1",
+    hour="3",
+    replace_existing=True,
+)
 scheduler.add_listener(
     job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
 )
@@ -334,7 +338,10 @@ def validate_processing_options():
         if not data["pricing_markup"]:
             return jsonify({"result": "error", "detail": "Markup is required."})
         #   pricing_discount: float - optional depending on data type
-        if not data["pricing_discount"]:
+        if (
+            data["price_strategy"] == "list_prices_only"
+            and not data["pricing_discount"]
+        ):
             return jsonify(
                 {"result": "error", "detail": "Discount is required."}
             )
@@ -356,7 +363,6 @@ def validate_processing_options():
 )
 def save_processing_options(automation_id: int):
     data = request.get_json()
-    ## @TODO: save to database with relation to automation
     add_processing_options(automation_id, str(data))
     ## @TODO: save to Zoho Creator app
     return "saved"
@@ -381,6 +387,8 @@ def get_automations(supplier_id: int):
             scheduler, automation["id"]
         )
         automation["next_run_time"] = next_run if next_run else None
+        options = get_processing_options(automation["id"])
+        automation["processing_options"] = dict(options[0]) if options else None
 
     return result
 
@@ -400,8 +408,9 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
     try:
         deleted_schedules = remove_automation_schedule(scheduler, automation_id)
     except Exception as e:
-        print(e)
+        app.logger.error(e)
     deleted_automations = delete_automation(automation_id, supplier_id)
+    delete_automation_processing_options(automation_id)
     result = {}
     if deleted_automations:
         result["automations"] = [dict(row) for row in deleted_automations]

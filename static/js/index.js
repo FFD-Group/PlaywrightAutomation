@@ -130,6 +130,11 @@ document.addEventListener('alpine:init', () => {
                 return response.json();
             })
             .then((supplier_data) => {
+                supplier_data.forEach((automation) => {
+                    if (automation["processing_options"]) {
+                        automation["processing_options"] = JSON.parse(automation["processing_options"]["options"].replace(/'/g, '"'));
+                    }
+                });
                 window.dispatchEvent(new CustomEvent("supplierloaded", {
                     detail: {
                         automations: supplier_data,
@@ -237,7 +242,7 @@ document.addEventListener('alpine:init', () => {
             {
                 this.processing_file_type = "Stock file";
                 this.disable_price_strategy = true;
-                this.price_strategy = null;
+                this.price_strategy = "";
             } 
             else if ((this.cm_stock_availability == "" && this.cm_stock_quantity == "")
                     && (this.cm_price != "" || this.cm_cost != ""))
@@ -309,20 +314,20 @@ document.addEventListener('alpine:init', () => {
             }
             
             processing_options = {
-                skip_rows: this.skip_rows,
-                sku_column: this.cm_sku,
-                stock_availability_column: this.cm_stock_availability,
-                price_column: this.cm_price,
-                cost_column: this.cm_cost,
-                stock_quantity_column: this.cm_stock_quantity,
-                data_type: this.processing_file_type,
-                stock_strategy: this.stock_strategy,
-                price_strategy: this.price_strategy,
-                pricing_markup: this.pricing_markup,
-                pricing_discount: this.pricing_discount,
-                specials_type: this.specials_type,
-                adv_pricing_group_column: this.adv_pricing_group_column,
-                adv_pricing_groups: this.adv_pricing_groups
+                "skip_rows": this.skip_rows,
+                "sku_column": this.cm_sku,
+                "stock_availability_column": this.cm_stock_availability,
+                "price_column": this.cm_price,
+                "cost_column": this.cm_cost,
+                "stock_quantity_column": this.cm_stock_quantity,
+                "data_type": this.processing_file_type,
+                "stock_strategy": this.stock_strategy,
+                "price_strategy": this.price_strategy,
+                "pricing_markup": this.pricing_markup,
+                "pricing_discount": this.pricing_discount,
+                "specials_type": this.specials_type,
+                "adv_pricing_group_column": this.adv_pricing_group_column,
+                "adv_pricing_groups": this.adv_pricing_groups
             };
             if (this.type == 0) { // automation type
                 fetch("/automations/validate_processing_options", {
