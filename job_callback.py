@@ -100,6 +100,7 @@ def job_callback(event) -> None:
                 "Automation",
                 time.time(),
                 get_supplier_id(supplier_details["supplier_name"]),
+                supplier_details["automation_id"],
             )
 
         if event.exception:

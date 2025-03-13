@@ -8,7 +8,11 @@ TRIGGER_PROCESS_URL = os.getenv("TRIGGER_PROCESS_URL")
 
 
 def ready_for_processing(
-    file_id: str, source: str, gathered_at: str, supplier_id: int
+    file_id: str,
+    source: str,
+    gathered_at: str,
+    supplier_id: int,
+    automation_id: int,
 ) -> None:
     """Prepares metadata ready for processing.
     file_id - the WorkDrive File ID of the data file
@@ -21,6 +25,7 @@ def ready_for_processing(
         "source": source,
         "gathered_at": gathered_at,
         "supplierID": supplier_id,
+        "automationID": automation_id,
     }
     trigger_processing(meta_data)
 
