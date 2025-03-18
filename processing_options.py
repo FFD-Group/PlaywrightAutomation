@@ -4,6 +4,9 @@ from pprint import pprint
 import requests
 from database import query_db, insert_to_db, delete_from_db
 import sqlite3
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SAVE_OPTIONS_URL = os.getenv("SAVE_OPTIONS_URL")
 

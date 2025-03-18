@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from pprint import pprint
 
+load_dotenv()
+
 TRIGGER_PROCESS_URL = os.getenv("TRIGGER_PROCESS_URL")
 
 
