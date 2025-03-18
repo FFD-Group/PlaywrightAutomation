@@ -25,6 +25,7 @@ from processing_options import (
     add_processing_options,
     get_processing_options,
     delete_automation_processing_options,
+    save_options_to_zoho,
 )
 
 UPLOAD_FOLDER = "static/uploads"
@@ -365,6 +366,7 @@ def save_processing_options(automation_id: int):
     data = request.get_json()
     add_processing_options(automation_id, str(data))
     ## @TODO: save to Zoho Creator app
+    save_options_to_zoho(automation_id, json.dumps(data))
     return "saved"
 
 
@@ -462,5 +464,14 @@ def add_sample_data():
         app.logger.debug("Installing sample data.")
         db = get_db()
         with app.open_resource("sample_data.sql", mode="r") as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+
+
+def run_sql_schema(scriptname):
+    with app.app_context():
+        app.logger.debug(f"Running database schema: {scriptname}")
+        db = get_db()
+        with app.open_resource(scriptname, mode="r") as f:
             db.cursor().executescript(f.read())
         db.commit()
