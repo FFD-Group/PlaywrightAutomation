@@ -182,25 +182,26 @@
                                     </template>
                                 </select> 
                             </label>
+                            <label for="group_starts_with"><input type="checkbox" name="group_starts_with" x-model="adv_pricing_group_starts_with" />Group by using starts-with rule</label>
                             <button type="button" @click.prevent="pricingGroupByChange()">Get Groups</button>
                             <table class="w-full">
                                 <tr>
                                     <th class="border border-slate-300">Group</th>
                                     <th class="border border-slate-300">Discount formula</th>
                                     <th class="border border-slate-300">Markup</th>
-                                    <th class="border border-slate-300">Extra</th>
                                 </tr>
                                 <template x-for="group in adv_pricing_groups">
                                     <tr class="border-b border-slate-300">
-                                        <td class="border border-slate-300 whitespace-nowrap px-1"><p x-text="group.value"></p></td>
+                                        <td class="border border-slate-300 whitespace-nowrap px-1"><input class="w-24" x-text="group.value" x-model="group.value" /></td>
                                         <td class="border border-slate-300 px-1"><input type="text" x-model="group.discount" placeholder="($P*0.58)+10" pattern="[\(\)\*0-9\.]*(\$P)[\(\)\*0-9\.]*"><br>
                                             <small>Price/cost variable: <strong>$P</strong>. Allowed characters: <i>()*.+</i> and digits.</small>
                                         </td>
                                         <td class="border border-slate-300 px-1"><label class="flex items-center p-0 m-0 gap-0" for="group_markup"><input style="width:75px" type="number" x-model="group.markup" step="0.01" placeholder="6.5">%</label></td>
-                                        <td class="border border-slate-300 px-1"><input type="text" style="width:75px" x-model="group.extra" placeholder="+20" pattern="[0-9\.\+\-]*"></td>
+                                        <td class="border border-slate-300 px-1"><label class="flex items-center p-0 m-0 gap-0" for="deleteGroup"><button type="button" @click.prevent="deleteGroup(group)">Delete</button></label></td>
                                     </tr>
                                 </template>
                             </table>
+                            <button type="button" @click.prevent="addGrouping()">Add Grouping</button>
                         </div>
                     </div>
                     <label for="specials_type">Specials:
@@ -327,7 +328,7 @@
             </fieldset>
         </form>
     </div>
-    <div class="border border-slate-200 rounded m-2 p-2">
+    <!-- <div class="border border-slate-200 rounded m-2 p-2">
         <h2 class="text-center font-bold text-lg">New upload</h2>
         <p class="m-2">Upload a new file for processing.</p>
         <form method="post" enctype="multipart/form-data">
@@ -360,7 +361,7 @@
                 </tr>
             </table>
         </div>
-    </div>
+    </div> -->
     <script type="text/javascript" src="../static/js/index.js"></script>
     <script type="text/javascript" src="../static/js/flash.js"></script>
 </body>

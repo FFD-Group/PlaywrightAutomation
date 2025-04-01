@@ -182,6 +182,7 @@ document.addEventListener('alpine:init', () => {
         pricing_discount: 0.00,
         specials_type: "seperate_specials_file",
         adv_pricing_group_column: "",
+        adv_pricing_group_starts_with: false,
         show_adv_pricing: false,
         adv_pricing_groups: [],
 
@@ -229,6 +230,26 @@ document.addEventListener('alpine:init', () => {
             .catch((error) => {
                 window.dispatchEvent(new CustomEvent("newflashmessage", {detail: {"category": "error", "message": error}}));
             });
+        },
+
+        addGrouping() {
+            this.adv_pricing_groups.push({
+                value: "",
+                discount: undefined,
+                markup: undefined
+            });
+        },
+
+        deleteGroup(group) {
+            this.adv_pricing_groups.forEach((existingGroup) => {
+                if (existingGroup["value"] == group["value"]
+                    && existingGroup["discount"] == group["discount"]
+                    && existingGroup["markup"] == group["markup"]
+                ) {
+                    this.adv_pricing_groups.splice(this.adv_pricing_groups.indexOf(existingGroup), 1);
+                    return;
+                }
+            })
         },
 
         setColumnMapping() {
@@ -327,6 +348,7 @@ document.addEventListener('alpine:init', () => {
                 "pricing_discount": this.pricing_discount,
                 "specials_type": this.specials_type,
                 "adv_pricing_group_column": this.adv_pricing_group_column,
+                "adv_pricing_group_starts_with": this.adv_pricing_group_starts_with,
                 "adv_pricing_groups": this.adv_pricing_groups
             };
             if (this.type == 0) { // automation type
