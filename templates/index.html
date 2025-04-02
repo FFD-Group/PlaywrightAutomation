@@ -248,7 +248,7 @@
                             <p class="even:bg-slate-100 font-bold p-2">Next run time: <span class="font-normal" x-text="get_formatted_run_time(automation.next_run_time)"></span></p>
                             <p class="even:bg-slate-100 font-bold p-2">Last run result: <span class="font-normal" x-text="automation.last_run_result"></span></p>
                             <!-- Processing Options -->
-                            <div x-data="{ options: automation.processing_options, open: false }">
+                            <div x-data="{ options: automation.processing_options, open: false,  closeProcessingOptions(options) {this.open = false; this.options = options;} }" x-show="options" @supplierloaded.window="closeProcessingOptions(automation.processing_options)">
                                 <button class="p-0 text-sm w-auto bg-inherit text-black font-normal underline m-1" @click.prevent.stop="open = !open"><span x-text="open ? 'Hide' : 'Show'"></span> Processing Options</button>
                                 <div x-show="open" class="p-1">
                                     <p class="font-bold">Skip Rows: <span class="italic font-normal" x-html="options.skip_rows"></span></p>
@@ -276,14 +276,12 @@
                                                     <th>Value</th>
                                                     <th>Formula</th>
                                                     <th>Markup</th>
-                                                    <th>Extra</th>
                                                 </tr>
                                                 <template x-for="group in options.adv_pricing_groups">
                                                         <tr class="odd:bg-slate-100">
                                                             <td x-text="group.value"></td>
                                                             <td x-text="group.discount"></td>
                                                             <td x-text="group.markup + '&percnt;'"></td>
-                                                            <td x-text="group.extra"></td>
                                                         </tr>
                                                 </template>
                                             </table>

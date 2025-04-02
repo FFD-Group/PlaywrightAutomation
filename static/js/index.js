@@ -54,55 +54,6 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 
-    Alpine.data('uploadHistory', () => ({
-        historyAvailable: false,
-        showHistory: false,
-        uploads: [],
-
-        setHistoryAvailable(b) {
-            this.showHistory = false;
-            this.historyAvailable = b;
-        },
-
-        getFormattedDateTime(timestamp) {
-            date = new Date(timestamp * 1000); // multiple by 1000 because of difference between JS and Python timestamps
-            return date.toLocaleDateString('en-GB', {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        },
-
-        fetchUploads() {
-            supplierId = Alpine.store('supplierId');
-            if (!supplierId) {
-                throw "No supplier ID";
-            }
-            // Fetch supplier uploads
-            fetch("/uploads/" + supplierId, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then((response) => {
-                if (!response.ok) {
-                    throw "Supplier uploads not fetched.";
-                }
-                return response.json();
-            })
-            .then((supplier_uploads) => {
-                this.uploads = supplier_uploads;
-                this.showHistory = true;
-            })
-            .catch((error) => {
-                console.error(error);
-                this.showHistory = false;
-            });
-        }
-    }));
-
     Alpine.data('supplierSelection', () => ({
         selection: null,
         load_disabled: true,
@@ -135,6 +86,8 @@ document.addEventListener('alpine:init', () => {
                         automation["processing_options"] = automation["processing_options"]["options"].replace(": True", ": 'true'"); //Don't just replace 'True' as we have a supplier with that name.
                         automation["processing_options"] = automation["processing_options"].replace(": False", ": 'false'");
                         automation["processing_options"] = JSON.parse(automation["processing_options"].replace(/'/g, '"'));
+                    } else {
+                        automation["processing_options"] = {};
                     }
                 });
                 window.dispatchEvent(new CustomEvent("supplierloaded", {
@@ -148,8 +101,6 @@ document.addEventListener('alpine:init', () => {
                 let label = select.selectedOptions[0].text;
                 Alpine.store("selectedSupplierLabel", label);
                 Alpine.store("supplierId", this.selection);
-                document.getElementById("upload_supplier_id").value = this.selection;
-                document.getElementById("upload_supplier_name").value = label;
             })
             .catch((error) => {
                 console.error(error);
