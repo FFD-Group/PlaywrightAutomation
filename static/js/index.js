@@ -132,7 +132,9 @@ document.addEventListener('alpine:init', () => {
             .then((supplier_data) => {
                 supplier_data.forEach((automation) => {
                     if (automation["processing_options"]) {
-                        automation["processing_options"] = JSON.parse(automation["processing_options"]["options"].replace(/'/g, '"'));
+                        automation["processing_options"] = automation["processing_options"]["options"].replace(": True", ": 'true'"); //Don't just replace 'True' as we have a supplier with that name.
+                        automation["processing_options"] = automation["processing_options"].replace(": False", ": 'false'");
+                        automation["processing_options"] = JSON.parse(automation["processing_options"].replace(/'/g, '"'));
                     }
                 });
                 window.dispatchEvent(new CustomEvent("supplierloaded", {
