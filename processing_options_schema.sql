@@ -1,0 +1,12 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE processing_options (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    options TEXT NOT NULL,
+    automation_id UNSIGNED INTEGER UNIQUE,
+    FOREIGN KEY (automation_id) REFERENCES automations(id)
+        ON DELETE CASCADE
+        ON UPDATE NO ACTION
+);
+
+COMMIT;

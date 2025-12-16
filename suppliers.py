@@ -18,9 +18,12 @@ API_HEADERS = {
 
 def get_suppliers() -> list:
     r = requests.get(SUPPLIERS_API, headers=API_HEADERS)
+    print(r.content)
+    print(r.status_code)
     if r.status_code == 200:
         return r.json()
     else:
+        print("Response from getting manufacturers off website: " + str(r))
         pass
     return []
 

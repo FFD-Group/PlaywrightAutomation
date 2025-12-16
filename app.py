@@ -1,4 +1,5 @@
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from flask_apscheduler import APScheduler
 from flask import (
     Flask,
     g,
@@ -11,7 +12,6 @@ from flask import (
     redirect,
     url_for,
 )
-from flask_apscheduler import APScheduler
 from apscheduler import events
 from datetime import datetime
 from logging.config import dictConfig
@@ -27,6 +27,19 @@ from processing_options import (
     delete_automation_processing_options,
     save_options_to_zoho,
 )
+from automations import clear_automation_schedule
+
+def schedule_backups(scheduler):
+    from database_backup import backup_database
+
+    scheduler.add_job(
+        id="database-backup",
+        func=backup_database,
+        trigger="cron",
+        day="*/1",
+        hour="3",
+        replace_existing=True,
+    )
 
 UPLOAD_FOLDER = "static/uploads"
 TEMP_FOLDER = "temp"
@@ -54,7 +67,37 @@ app.logger.info("Creating Advanced Python Scheduler object and initialising.")
 
 scheduler = APScheduler()
 scheduler.init_app(app)
-scheduler.start()
+
+if os.getenv("RUN_SCHEDULER", "0") == "1":
+    from job_callback import job_callback
+    from scheduler_sync import init_scheduler_sync, sync_schedules_job
+
+    app.logger.info("RUN_SCHEDULER=1: starting APScheduler")
+
+    # Provide globals for sync job (do NOT pass app/scheduler as job args)
+    init_scheduler_sync(app, scheduler)
+
+    # Start scheduler once
+    scheduler.start()
+
+    # Listener + any scheduler-only jobs
+    scheduler.add_listener(job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED)
+    schedule_backups(scheduler)
+
+    # Run one sync immediately
+    sync_schedules_job()
+
+    # Poll DB periodically to apply schedules
+    scheduler.add_job(
+        id="sync-schedules",
+        func=sync_schedules_job,
+        trigger="interval",
+        seconds=15,
+        replace_existing=True,
+    )
+else:
+    app.logger.info("RUN_SCHEDULER not set: NOT starting APScheduler in this process")
+
 
 from automations import (
     create_automation,
@@ -78,8 +121,6 @@ from job_schedule import (
     CRON_SCHEDULES,
 )
 from storage import WorkDrive
-from job_callback import job_callback
-from database_backup import backup_database
 
 
 app.logger.info(
@@ -91,25 +132,13 @@ def betterstack_heartbeat():
     requests.get(os.getenv("HEARTBEAT_URL"))
 
 
-scheduler.add_job(
-    id="heartbeat",
-    func=betterstack_heartbeat,
-    trigger="cron",
-    hour="*/1",
-    replace_existing=True,
-)
-scheduler.add_job(
-    id="database-backup",
-    func=backup_database,
-    trigger="cron",
-    day="*/1",
-    hour="3",
-    replace_existing=True,
-)
-scheduler.add_listener(
-    job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
-)
-
+# scheduler.add_job(
+#     id="heartbeat",
+#     func=betterstack_heartbeat,
+#     trigger="cron",
+#     hour="*/1",
+#     replace_existing=True,
+# )
 
 ## INDEX
 def allowed_file(filename):
@@ -385,10 +414,7 @@ def get_automations(supplier_id: int):
     existing_automations = get_supplier_automations(supplier_id)
     result = [dict(row) for row in existing_automations]
     for automation in result:
-        next_run: datetime = get_automation_next_run_time(
-            scheduler, automation["id"]
-        )
-        automation["next_run_time"] = next_run if next_run else None
+        automation["next_run_time"] = None
         options = get_processing_options(automation["id"])
         automation["processing_options"] = dict(options[0]) if options else None
 
@@ -407,10 +433,8 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
     )
     app.logger.info("Deleting automation: " + str(logdata))
     deleted_schedules = None
-    try:
-        deleted_schedules = remove_automation_schedule(scheduler, automation_id)
-    except Exception as e:
-        app.logger.error(e)
+    # mark schedule removed in DB so scheduler service will remove the job on next sync
+    clear_automation_schedule(automation_id)
     deleted_automations = delete_automation(automation_id, supplier_id)
     delete_automation_processing_options(automation_id)
     result = {}
@@ -427,17 +451,10 @@ def delete_supplier_automation(supplier_id: int, automation_id: int):
 @app.route("/schedule/<string:automation_id>", methods=["POST"])
 def schedule_automation(automation_id: str):
     data = request.get_json()
-    app.logger.info(
-        f"Scheduling automation with ID: {automation_id} for: " + str(data)
-    )
     schedule = data["schedule"]
-    cron = CRON_SCHEDULES[schedule]
-    if schedule == "custom":
-        cron["hour"], cron["minute"] = data["time"].split(":")
-    set_automation_schedule(automation_id, schedule)
-    add_automation_schedule(scheduler, automation_id, cron, data["type"])
-    next_run = get_automation_next_run_time(scheduler, automation_id)
-    return json.dumps(next_run)
+    time_str = data.get("time")  # "HH:MM" when schedule == "custom"
+    set_automation_schedule(automation_id, schedule, time_str)
+    return json.dumps({"result": "ok"})
 
 
 ## DATABASE

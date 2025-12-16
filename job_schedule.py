@@ -15,7 +15,7 @@ def add_automation_schedule(scheduler: APScheduler, automation_id: str, cron: di
     """Create a job for the automation with the given ID and
     schedule it to run on the given cron schedule."""
     replace = True if scheduler.get_job(automation_id) else False
-    if (automation_type == 0):
+    if int(automation_type) == 0:
         automation_steps = get_automation_steps(automation_id)
         automation_steps = [dict(row) for row in automation_steps]
         scheduler.add_job(id=automation_id, func=getattr(automation_runner, "run_automation_steps"), replace_existing=replace, kwargs={"automation_id": automation_id, "steps": automation_steps}, trigger='cron', **cron)
@@ -42,7 +42,19 @@ def resume_automation_schedule(scheduler: APScheduler, automation_id: str) -> No
     scheduler.resume_job(automation_id)
 
 def get_automation_next_run_time(scheduler: APScheduler, automation_id: str) -> str|None:
-    job = scheduler.get_job(automation_id)
-    if job:
-        return job.next_run_time
+    job = scheduler.get_job(str(automation_id))
+    if not job:
+        return None
+
+    # APScheduler v3: next_run_time
+    nrt = getattr(job, "next_run_time", None)
+    if nrt is not None:
+        return nrt
+
+    # APScheduler v4 / some wrappers: next_fire_time
+    nft = getattr(job, "next_fire_time", None)
+    if nft is not None:
+        return nft
+
+    # Fallback: don’t crash the UI
     return None
