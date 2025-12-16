@@ -11,19 +11,28 @@ from trigger_process import ready_for_processing
 
 
 def job_callback(event) -> None:
+    job_id = str(event.job_id)
+
+    # Only handle automation jobs (numeric IDs); ignore service tasks like backups/heartbeats.
+    if not job_id.isdigit():
+        scheduler.app.logger.debug(
+            f"Skipping job callback for non-automation job_id={job_id}"
+        )
+        return
+
     with scheduler.app.app_context():
         load_dotenv()
         cliq = Cliq()
-        supplier_details = [
-            dict(row) for row in get_automation_card_data(event.job_id)
-        ]
-        if len(supplier_details) > 0:
-            supplier_details = supplier_details[0]
+        supplier_details_rows = get_automation_card_data(event.job_id)
+        supplier_details = (
+            dict(supplier_details_rows[0]) if supplier_details_rows else None
+        )
         if not supplier_details:
             supplier_details = {
                 "supplier_name": "Unknown",
                 "type": 1,
                 "automation_name": "Unknown",
+                "automation_id": int(job_id),
             }
         type_value = (
             "Automation" if supplier_details["type"] == 0 else "Download"

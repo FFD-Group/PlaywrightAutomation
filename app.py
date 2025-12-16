@@ -29,6 +29,7 @@ from processing_options import (
 )
 from automations import clear_automation_schedule
 
+
 def schedule_backups(scheduler):
     from database_backup import backup_database
 
@@ -40,6 +41,17 @@ def schedule_backups(scheduler):
         hour="3",
         replace_existing=True,
     )
+
+
+def schedule_heartbeat(scheduler):
+    scheduler.add_job(
+        id="heartbeat",
+        func=betterstack_heartbeat,
+        trigger="cron",
+        hour="*/1",
+        replace_existing=True,
+    )
+
 
 UPLOAD_FOLDER = "static/uploads"
 TEMP_FOLDER = "temp"
@@ -61,7 +73,7 @@ app.config.from_object(Config())
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["TEMP_FOLDER"] = TEMP_FOLDER
 
-app.secret_key = b"tghJUV813_d/emp1"
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 app.logger.info("Creating Advanced Python Scheduler object and initialising.")
 
@@ -81,8 +93,11 @@ if os.getenv("RUN_SCHEDULER", "0") == "1":
     scheduler.start()
 
     # Listener + any scheduler-only jobs
-    scheduler.add_listener(job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED)
+    scheduler.add_listener(
+        job_callback, events.EVENT_JOB_ERROR | events.EVENT_JOB_EXECUTED
+    )
     schedule_backups(scheduler)
+    schedule_heartbeat(scheduler)
 
     # Run one sync immediately
     sync_schedules_job()
@@ -96,7 +111,9 @@ if os.getenv("RUN_SCHEDULER", "0") == "1":
         replace_existing=True,
     )
 else:
-    app.logger.info("RUN_SCHEDULER not set: NOT starting APScheduler in this process")
+    app.logger.info(
+        "RUN_SCHEDULER not set: NOT starting APScheduler in this process"
+    )
 
 
 from automations import (
@@ -139,6 +156,7 @@ def betterstack_heartbeat():
 #     hour="*/1",
 #     replace_existing=True,
 # )
+
 
 ## INDEX
 def allowed_file(filename):
